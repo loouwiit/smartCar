@@ -1,0 +1,19 @@
+{
+	"configurations": [
+		{
+			"cwd": "${workspaceFolder}",
+			"executable": "build/helloConfig.out",
+			"name": "Debug with PyOCD",
+			"request": "launch",
+			"type": "cortex-debug",
+			"runToEntryPoint": "main",
+			"showDevDebugOutput": "none",
+			"servertype": "pyocd",
+			"device": "MSPM0G3507",
+			"serverArgs": [
+				"--target",
+				"MSPM0G3507"
+			]
+		}
+	]
+}
