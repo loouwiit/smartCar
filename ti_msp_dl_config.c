@@ -65,18 +65,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
 SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 {
 
-    DL_GPIO_initDigitalOutput(LED_B_IOMUX);
+    DL_GPIO_initDigitalOutput(PG_PP_IOMUX);
 
-    DL_GPIO_initDigitalOutput(LED_R_IOMUX);
-
-    DL_GPIO_initDigitalOutput(LED_G_IOMUX);
-
-    DL_GPIO_clearPins(LED_PORT, LED_B_PIN |
-		LED_R_PIN |
-		LED_G_PIN);
-    DL_GPIO_enableOutput(LED_PORT, LED_B_PIN |
-		LED_R_PIN |
-		LED_G_PIN);
+    DL_GPIO_clearPins(PG_PORT, PG_PP_PIN);
+    DL_GPIO_enableOutput(PG_PORT, PG_PP_PIN);
 
 }
 

@@ -1,11 +1,11 @@
-NAME = helloConfig
+NAME = smartCar
+
+STARTUP_FILE = $(MSPM0_SDK_INSTALL_DIR)/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g350x_gcc.c
 
 CPP_FILES = $(wildcard src/*.cpp)
-C_FILES = $(wildcard src/*.c) syscalls.c
+C_FILES = $(wildcard src/*.c) syscalls.c ti_msp_dl_config.c $(STARTUP_FILE)
 
-MSPM0_SDK_INSTALL_DIR ?= $(abspath /opt/ti/mspm0_sdk_2_05_00_05)
-
-include $(MSPM0_SDK_INSTALL_DIR)/imports.mak
+MSPM0_SDK_INSTALL_DIR ?= $(abspath /opt/ti/mspm0_sdk_2_11_00_07)
 
 CC = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
 LNK = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
@@ -79,7 +79,7 @@ LFLAGS += "-L$(MSPM0_SDK_INSTALL_DIR)/source/ti/driverlib/lib/gcc/m0p/mspm0g1x0x
     --specs=nano.specs \
     --specs=nosys.specs
 
-all: $(NAME).out
+all: $(NAME).elf
 
 .INTERMEDIATE: syscfg
 $(SYSCFG_FILES): syscfg
@@ -120,7 +120,7 @@ $(foreach cpp_file,$(CPP_FILES),$(eval $(call CPP_RULE,$(cpp_file))))
 
 $(foreach c_file,$(C_FILES),$(eval $(call C_RULE,$(c_file))))
 
-$(NAME).out: $(OBJECTS)
+$(NAME).elf: $(OBJECTS)
 	@ echo Linking $@
-	@ $(LNK)  $(addprefix build/,$(OBJECTS))  $(LFLAGS) -o build/$(NAME).out
+	@ $(LNK)  $(addprefix build/,$(OBJECTS))  $(LFLAGS) -o build/$(NAME).elf
 	@ echo Finish linking $@

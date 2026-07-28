@@ -2,16 +2,8 @@
 
 void test()
 {
-	DL_GPIO_togglePins(LED_PORT, LED_R_PIN);
+	DL_GPIO_togglePins(PG_PORT, PG_PP_PIN);
 	delay_cycles(CPUCLK_FREQ);
-	DL_GPIO_togglePins(LED_PORT, LED_R_PIN);
-	delay_cycles(CPUCLK_FREQ);
-	DL_GPIO_togglePins(LED_PORT, LED_G_PIN);
-	delay_cycles(CPUCLK_FREQ);
-	DL_GPIO_togglePins(LED_PORT, LED_G_PIN);
-	delay_cycles(CPUCLK_FREQ);
-	DL_GPIO_togglePins(LED_PORT, LED_B_PIN);
-	delay_cycles(CPUCLK_FREQ);
-	DL_GPIO_togglePins(LED_PORT, LED_B_PIN);
+	DL_GPIO_togglePins(PG_PORT, PG_PP_PIN);
 	delay_cycles(CPUCLK_FREQ);
 }
