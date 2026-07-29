@@ -7,6 +7,7 @@
 #include "autoDeleteThread.hpp"
 #include "gpioInterrupt.hpp"
 #include "gpio.hpp"
+#include "clock.h"
 
 constexpr size_t rxBufferSize = 64;
 constexpr size_t rxBufferCount = 5;
@@ -20,10 +21,12 @@ void uartThread(void*);
 void graySensorThread(void*);
 void keyThread(void*);
 void servemoterThread(void*);
+void oledThread(void*);
 
 int main(void)
 {
 	SYSCFG_DL_init();
+	SysTick_Init();
 
 	xTaskCreate(mainThread, "main", 0x100, nullptr, 1, nullptr);
 
@@ -54,6 +57,7 @@ void mainThread(void*)
 	xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(servemoterThread, "servemoter", 0x100, nullptr, 1, nullptr);
+	xTaskCreate(oledThread, "oled", 0x200, nullptr, 1, nullptr);
 }
 
 void uartInit()
