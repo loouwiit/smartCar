@@ -21,7 +21,6 @@ extern "C"
 {
 #endif
 	//OLED控制用函数
-	void delay_ms(uint32_t ms);
 	void OLED_ColorTurn(uint8_t i);
 	void OLED_DisplayTurn(uint8_t i);
 	void OLED_WR_Byte(uint8_t dat, uint8_t cmd);

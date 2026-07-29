@@ -26,7 +26,7 @@ void oledThread(void*);
 int main(void)
 {
 	SYSCFG_DL_init();
-	SysTick_Init();
+	// SysTick_Init();
 
 	xTaskCreate(mainThread, "main", 0x100, nullptr, 1, nullptr);
 
