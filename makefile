@@ -102,6 +102,7 @@ LFLAGS += "-L$(MSPM0_SDK_INSTALL_DIR)/source/ti/driverlib/lib/gcc/m0p/mspm0g1x0x
     -lgcc \
     -lc \
     -lm \
+    -u _printf_float \
     --specs=nano.specs \
     --specs=nosys.specs
 
