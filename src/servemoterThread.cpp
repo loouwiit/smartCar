@@ -27,14 +27,14 @@ void servemoterThread(void*)
 	while (true)
 	{
 		target += direction;
-		if (target >= 3000)
+		if (target >= 2500)
 		{
-			target = 3000 - 1;
+			target = 2500 - 1;
 			direction = -20;
 		}
-		if (target < 000)
+		if (target < 500)
 		{
-			target = 000;
+			target = 500;
 			direction = +20;
 		}
 
