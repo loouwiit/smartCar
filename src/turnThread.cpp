@@ -22,7 +22,7 @@ extern FPID fpid[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
 
 int turnContorl = 0;
-int leftTurnCount = -270;
+int leftTurnCount = -550;
 unsigned turnRoundCount = 0;
 
 constexpr static int turnDeadZone = 20;

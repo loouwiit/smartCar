@@ -202,12 +202,12 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define KEY_KEY_1_IIDX                                      (DL_GPIO_IIDX_DIO21)
 #define KEY_KEY_1_PIN                                           (DL_GPIO_PIN_21)
 #define KEY_KEY_1_IOMUX                                          (IOMUX_PINCM49)
-/* Port definition for Pin Group test */
-#define test_PORT                                                        (GPIOB)
+/* Port definition for Pin Group LED */
+#define LED_PORT                                                         (GPIOB)
 
-/* Defines for led: GPIOB.27 with pinCMx 58 on package pin 29 */
-#define test_led_PIN                                            (DL_GPIO_PIN_27)
-#define test_led_IOMUX                                           (IOMUX_PINCM58)
+/* Defines for G: GPIOB.27 with pinCMx 58 on package pin 29 */
+#define LED_G_PIN                                               (DL_GPIO_PIN_27)
+#define LED_G_IOMUX                                              (IOMUX_PINCM58)
 /* Defines for A1: GPIOB.24 with pinCMx 52 on package pin 23 */
 #define Motor_A1_PORT                                                    (GPIOB)
 #define Motor_A1_PIN                                            (DL_GPIO_PIN_24)

@@ -58,8 +58,17 @@ void keyPress()
 void keyRelease()
 {
 	auto pressTime = xTaskGetTickCount() - keyPressTime;
-	if (pressTime > longPressTime) start();
-	else turnRoundCount += 4;
+	if (pressTime > longPressTime)
+	{
+		void calibrateThread(void*);
+		xTaskCreate(calibrateThread, "calibrate", 0x100, nullptr, 2, nullptr);
+		GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, nullptr, nullptr);
+	}
+	else
+	{
+		turnRoundCount = 4;
+		start();
+	}
 }
 
 void start()

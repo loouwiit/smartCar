@@ -95,9 +95,9 @@ void uartThread(void*)
 			vTaskDelay(1);
 
 		// txSize = sprintf(txBuffer, "%.1f %.1f %.1f %.1f\t\t%.1f %.1f %.1f %.1f %d\n", mixer[0][0], mixer[0][1], mixer[0][2], mixer[0][3], mixer[1][0], mixer[1][1], mixer[1][2], mixer[1][3], turnContorl);
-		txSize = sprintf(txBuffer, "%d %d %d %d %d %d %d %d\n", (bool)graySensor[0], (bool)graySensor[1], (bool)graySensor[2], (bool)graySensor[3], (bool)graySensor[4], (bool)graySensor[5], (bool)graySensor[6], (bool)graySensor[7]);
+		// txSize = sprintf(txBuffer, "%d %d %d %d %d %d %d %d\n", (bool)graySensor[0], (bool)graySensor[1], (bool)graySensor[2], (bool)graySensor[3], (bool)graySensor[4], (bool)graySensor[5], (bool)graySensor[6], (bool)graySensor[7]);
 		// txSize = sprintf(txBuffer, "%.7f\n", (float)(moveCount[0] - moveCount[1]) / RoundCount);
-		// txSize = sprintf(txBuffer, "%.2f %.2f %.2f %.2f\n",captureSpeeds[0], captureSpeeds[1], fpid[0].getOut(), fpid[1].getOut());
+		// txSize = sprintf(txBuffer, "speed %.2f %.2f %.2f %.2f\n",captureSpeeds[0], captureSpeeds[1], fpid[0].getOut(), fpid[1].getOut());
 		// txSize = sprintf(txBuffer, "%4d %4d %4d %4d %4d %4d %4d %4d\n", (int)graySensor.getAdcValue(0), (int)graySensor.getAdcValue(1), (int)graySensor.getAdcValue(2), (int)graySensor.getAdcValue(3), (int)graySensor.getAdcValue(4), (int)graySensor.getAdcValue(5), (int)graySensor.getAdcValue(6), (int)graySensor.getAdcValue(7));
 
 		while (uart.isTransiting())

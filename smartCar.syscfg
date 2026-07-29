@@ -134,9 +134,9 @@ GPIO5.associatedPins[0].polarity         = "RISE_FALL";
 GPIO5.associatedPins[0].inputFilter      = "3_CYCLES";
 GPIO5.associatedPins[0].pin.$assign      = "j19_expansion.4";
 
-GPIO6.$name                               = "test";
-GPIO6.associatedPins[0].$name             = "led";
+GPIO6.$name                               = "LED";
 GPIO6.associatedPins[0].launchPadShortcut = "LED2GreenEn";
+GPIO6.associatedPins[0].$name             = "G";
 
 I2C1.basicEnableController             = true;
 I2C1.$name                             = "I2C_MPU6050";

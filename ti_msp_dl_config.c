@@ -151,7 +151,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_initDigitalOutput(test_led_IOMUX);
+    DL_GPIO_initDigitalOutput(LED_G_IOMUX);
 
     DL_GPIO_initDigitalOutput(Motor_A1_IOMUX);
 
@@ -187,12 +187,12 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_enableOutput(GPIOA, Motor_A2_PIN |
 		Motor_B2_PIN |
 		GraySensor_GraySensorB_PIN);
-    DL_GPIO_clearPins(GPIOB, test_led_PIN |
+    DL_GPIO_clearPins(GPIOB, LED_G_PIN |
 		Motor_A1_PIN |
 		Motor_B1_PIN |
 		GraySensor_GraySensorA_PIN |
 		GraySensor_GraySensorC_PIN);
-    DL_GPIO_enableOutput(GPIOB, test_led_PIN |
+    DL_GPIO_enableOutput(GPIOB, LED_G_PIN |
 		Motor_A1_PIN |
 		Motor_B1_PIN |
 		GraySensor_GraySensorA_PIN |

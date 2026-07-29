@@ -22,24 +22,6 @@ void graySensorThread(void*);
 void mpu6050Thread(void*);
 void keyThread(void*);
 
-void testThread(void*)
-{
-	AutoDeleteThread autoDeleteThread{};
-	while (uart.isTransiting())
-		vTaskDelay(1);
-	uart.transit("testThread started\n", 19);
-
-	GPIO testGpio{ test_PORT, test_led_PIN };
-	while (true)
-	{
-		testGpio.toggle();
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		uart.transit("led toggle\n", 11);
-		vTaskDelay(pdMS_TO_TICKS(1000));
-	}
-}
-
 int main(void)
 {
 	SYSCFG_DL_init();
@@ -74,7 +56,6 @@ void mainThread(void*)
 	xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
 	//xTaskCreate(mpu6050Thread, "mpu6050", 0x200, nullptr, 1, nullptr);
-	xTaskCreate(testThread, "test", 0x100, nullptr, 1, nullptr);
 }
 
 void uartInit()
