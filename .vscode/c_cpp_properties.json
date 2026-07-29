@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/ti/mspm0_sdk_2_05_00_05/source/",
-                "/opt/ti/mspm0_sdk_2_05_00_05/source/third_party/CMSIS/Core/Include"
+                "/opt/ti/mspm0_sdk_2_11_00_07/source/",
+                "/opt/ti/mspm0_sdk_2_11_00_07/source/third_party/CMSIS/Core/Include"
             ],
             "defines": ["__MSPM0G3507__"]
         }

@@ -3,12 +3,26 @@ NAME = smartCar
 STARTUP_FILE = $(MSPM0_SDK_INSTALL_DIR)/source/ti/devices/msp/m0p/startup_system_files/gcc/startup_mspm0g350x_gcc.c
 
 CPP_FILES = $(wildcard src/*.cpp)
-C_FILES = $(wildcard src/*.c) syscalls.c ti_msp_dl_config.c $(STARTUP_FILE)
+FREERTOS_DIR = $(MSPM0_SDK_INSTALL_DIR)/kernel/freertos
+FREERTOS_SRC = \
+    $(FREERTOS_DIR)/Source/tasks.c \
+    $(FREERTOS_DIR)/Source/queue.c \
+    $(FREERTOS_DIR)/Source/list.c \
+    $(FREERTOS_DIR)/Source/timers.c \
+    $(FREERTOS_DIR)/Source/event_groups.c \
+    $(FREERTOS_DIR)/Source/stream_buffer.c \
+    $(FREERTOS_DIR)/Source/croutine.c \
+    $(FREERTOS_DIR)/Source/portable/GCC/ARM_CM0/port.c \
+    $(FREERTOS_DIR)/Source/portable/GCC/ARM_CM0/portasm.c \
+    $(FREERTOS_DIR)/Source/portable/MemMang/heap_4.c
 
 MSPM0_SDK_INSTALL_DIR ?= $(abspath /opt/ti/mspm0_sdk_2_11_00_07)
 
-CC = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
-LNK = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
+CC = arm-none-eabi-gcc
+LNK = arm-none-eabi-g++
+ARM_NONE_EABI ?= /usr/lib/arm-none-eabi
+
+SYSCONFIG_TOOL ?= /opt/ti/sysconfig_1.28.0/sysconfig_cli.sh
 
 SYSCONFIG_GUI_TOOL = $(dir $(SYSCONFIG_TOOL))sysconfig_gui$(suffix $(SYSCONFIG_TOOL))
 SYSCFG_CMD_STUB = $(SYSCONFIG_TOOL) --compiler gcc --product $(MSPM0_SDK_INSTALL_DIR)/.metadata/product.json
@@ -19,6 +33,14 @@ SYSCFG_C_FILES = $(filter %.c,$(SYSCFG_FILES))
 SYSCFG_H_FILES = $(filter %.h,$(SYSCFG_FILES))
 SYSCFG_OPT_FILES = $(filter %.opt,$(SYSCFG_FILES))
 
+# C_FILES: 排除 SysConfig 已生成的文件避免重复编译
+# (ifeq 必须在 SYSCFG_C_FILES 定义之后才能正确判断)
+ifeq ($(SYSCFG_C_FILES),)
+C_FILES = $(wildcard src/*.c) syscalls.c ti_msp_dl_config.c $(STARTUP_FILE) $(FREERTOS_SRC)
+else
+C_FILES = $(wildcard src/*.c) syscalls.c $(FREERTOS_SRC)
+endif
+
 OBJECTS = $(patsubst %.cpp,%.obj,$(notdir $(CPP_FILES))) $(patsubst %.c,%.obj,$(notdir $(C_FILES))) $(patsubst %.c,%.obj,$(notdir $(SYSCFG_C_FILES)))
 
 CFLAGS += -I. \
@@ -27,6 +49,8 @@ CFLAGS += -I. \
     @device.opt \
     "-I$(MSPM0_SDK_INSTALL_DIR)/source/third_party/CMSIS/Core/Include" \
     "-I$(MSPM0_SDK_INSTALL_DIR)/source" \
+    "-I$(FREERTOS_DIR)/Source/include" \
+    "-I$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM0" \
     -mcpu=cortex-m0plus \
     -march=armv6-m \
     -mthumb \
@@ -37,8 +61,8 @@ CFLAGS += -I. \
     -g \
     -gstrict-dwarf \
     -Wall \
-    "-I$(GCC_ARMCOMPILER)/arm-none-eabi/include/newlib-nano" \
-    "-I$(GCC_ARMCOMPILER)/arm-none-eabi/include"
+    "-I$(ARM_NONE_EABI)/include/nano" \
+    "-I$(ARM_NONE_EABI)/include"
 
 CPPFLAGS += -I. \
     $(addprefix @,$(SYSCFG_OPT_FILES)) \
@@ -46,6 +70,8 @@ CPPFLAGS += -I. \
     @device.opt \
     "-I$(MSPM0_SDK_INSTALL_DIR)/source/third_party/CMSIS/Core/Include" \
     "-I$(MSPM0_SDK_INSTALL_DIR)/source" \
+    "-I$(FREERTOS_DIR)/Source/include" \
+    "-I$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM0" \
     -mcpu=cortex-m0plus \
     -march=armv6-m \
     -mthumb \
@@ -56,8 +82,8 @@ CPPFLAGS += -I. \
     -g \
     -gstrict-dwarf \
     -Wall \
-    "-I$(GCC_ARMCOMPILER)/arm-none-eabi/include/newlib-nano" \
-    "-I$(GCC_ARMCOMPILER)/arm-none-eabi/include"
+    "-I$(ARM_NONE_EABI)/include/nano" \
+    "-I$(ARM_NONE_EABI)/include"
 
 LFLAGS += "-L$(MSPM0_SDK_INSTALL_DIR)/source/ti/driverlib/lib/gcc/m0p/mspm0g1x0x_g3x0x" \
     -nostartfiles \
@@ -72,7 +98,7 @@ LFLAGS += "-L$(MSPM0_SDK_INSTALL_DIR)/source/ti/driverlib/lib/gcc/m0p/mspm0g1x0x
     -mthumb \
     -static \
     -Wl,--gc-sections \
-    "-L$(GCC_ARMCOMPILER)/arm-none-eabi/lib/thumb/v6-m/nofp" \
+    "-L$(ARM_NONE_EABI)/lib/thumb/v6-m/nofp" \
     -lgcc \
     -lc \
     -lm \
