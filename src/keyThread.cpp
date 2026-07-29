@@ -18,9 +18,6 @@ extern Mixer<float, MixNumber::Count> mixer[2];
 
 extern bool grayEnable;
 
-extern unsigned turnRoundCount;
-extern int turnContorl;
-
 extern TickType_t nextTurnTime;
 constexpr TickType_t StartTimeCoolDown = 2000;
 
@@ -64,11 +61,7 @@ void keyRelease()
 		xTaskCreate(calibrateThread, "calibrate", 0x100, nullptr, 2, nullptr);
 		GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, nullptr, nullptr);
 	}
-	else
-	{
-		turnRoundCount = 4;
-		start();
-	}
+	else start();
 }
 
 void start()
@@ -78,16 +71,11 @@ void start()
 
 	grayEnable = true;
 
-	nextTurnTime = xTaskGetTickCount() + StartTimeCoolDown;
-	turnContorl = 0;
-
 	mixer[0][MixNumber::Key] = +KeySpeed;
 	mixer[1][MixNumber::Key] = +KeySpeed;
 
 	mixer[0].enable(MixNumber::GraySensor);
 	mixer[1].enable(MixNumber::GraySensor);
-	mixer[0].enable(MixNumber::Turn);
-	mixer[1].enable(MixNumber::Turn);
 }
 
 void stop()
@@ -100,11 +88,6 @@ void stop()
 	mixer[0][MixNumber::Key] = 0.0f;
 	mixer[1][MixNumber::Key] = 0.0f;
 
-	mixer[0][MixNumber::Turn] = 0;
-	mixer[1][MixNumber::Turn] = 0;
-
 	mixer[0].disable(MixNumber::GraySensor);
 	mixer[1].disable(MixNumber::GraySensor);
-	mixer[0].disable(MixNumber::Turn);
-	mixer[1].disable(MixNumber::Turn);
 }

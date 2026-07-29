@@ -51,11 +51,9 @@ void mainThread(void*)
 
 	xTaskCreate(captureThread, "capture", 0x100, nullptr, 2, nullptr);
 	xTaskCreate(motorThread, "motor", 0x100, nullptr, 2, nullptr);
-	xTaskCreate(strightKeepThread, "stright keep", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(uartThread, "uart", 0x200, nullptr, 2, nullptr);
 	xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
-	//xTaskCreate(mpu6050Thread, "mpu6050", 0x200, nullptr, 1, nullptr);
 }
 
 void uartInit()
