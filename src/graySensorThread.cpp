@@ -20,8 +20,6 @@ float grayMoveSpeed = 0.1f;
 
 bool grayEnable = false;
 
-static bool keyDisabled = false;
-
 void graySensorThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
@@ -30,7 +28,6 @@ void graySensorThread(void*)
 	uart.transit("gray started\n", 13);
 
 	float graySpeed = 0;
-	float gapSpeed = 0.0f;
 	float lastGray = 0;
 
 	graySensor.setThreshold(0, 583.05);

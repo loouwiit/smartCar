@@ -16,10 +16,8 @@ UART uart{};
 void mainThread(void*);
 void captureThread(void*);
 void motorThread(void*);
-void strightKeepThread(void*);
 void uartThread(void*);
 void graySensorThread(void*);
-void mpu6050Thread(void*);
 void keyThread(void*);
 
 int main(void)
