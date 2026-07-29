@@ -41,6 +41,7 @@
 #include "ti_msp_dl_config.h"
 
 DL_TimerA_backupConfig gMotor_PwmBackup;
+DL_TimerG_backupConfig gServomotor_PwmBackup;
 DL_TimerA_backupConfig gEncoderCaptureBackup;
 
 /*
@@ -54,6 +55,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     /* Module-Specific Initializations*/
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_Motor_Pwm_init();
+    SYSCFG_DL_Servomotor_Pwm_init();
     SYSCFG_DL_EncoderCapture_init();
     SYSCFG_DL_I2C_MPU6050_init();
     SYSCFG_DL_UART_0_init();
@@ -61,6 +63,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_DMA_init();
     /* Ensure backup structures have no valid state */
 	gMotor_PwmBackup.backupRdy 	= false;
+	gServomotor_PwmBackup.backupRdy 	= false;
 	gEncoderCaptureBackup.backupRdy 	= false;
 
 
@@ -74,6 +77,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_saveConfiguration(Motor_Pwm_INST, &gMotor_PwmBackup);
+	retStatus &= DL_TimerG_saveConfiguration(Servomotor_Pwm_INST, &gServomotor_PwmBackup);
 	retStatus &= DL_TimerA_saveConfiguration(EncoderCapture_INST, &gEncoderCaptureBackup);
 
     return retStatus;
@@ -85,6 +89,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
     bool retStatus = true;
 
 	retStatus &= DL_TimerA_restoreConfiguration(Motor_Pwm_INST, &gMotor_PwmBackup, false);
+	retStatus &= DL_TimerG_restoreConfiguration(Servomotor_Pwm_INST, &gServomotor_PwmBackup, false);
 	retStatus &= DL_TimerA_restoreConfiguration(EncoderCapture_INST, &gEncoderCaptureBackup, false);
 
     return retStatus;
@@ -95,6 +100,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOA);
     DL_GPIO_reset(GPIOB);
     DL_TimerA_reset(Motor_Pwm_INST);
+    DL_TimerG_reset(Servomotor_Pwm_INST);
     DL_TimerA_reset(EncoderCapture_INST);
     DL_I2C_reset(I2C_MPU6050_INST);
     DL_UART_Main_reset(UART_0_INST);
@@ -104,6 +110,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(Motor_Pwm_INST);
+    DL_TimerG_enablePower(Servomotor_Pwm_INST);
     DL_TimerA_enablePower(EncoderCapture_INST);
     DL_I2C_enablePower(I2C_MPU6050_INST);
     DL_UART_Main_enablePower(UART_0_INST);
@@ -119,6 +126,8 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_enableOutput(GPIO_Motor_Pwm_C0_PORT, GPIO_Motor_Pwm_C0_PIN);
     DL_GPIO_initPeripheralOutputFunction(GPIO_Motor_Pwm_C1_IOMUX,GPIO_Motor_Pwm_C1_IOMUX_FUNC);
     DL_GPIO_enableOutput(GPIO_Motor_Pwm_C1_PORT, GPIO_Motor_Pwm_C1_PIN);
+    DL_GPIO_initPeripheralOutputFunction(GPIO_Servomotor_Pwm_C1_IOMUX,GPIO_Servomotor_Pwm_C1_IOMUX_FUNC);
+    DL_GPIO_enableOutput(GPIO_Servomotor_Pwm_C1_PORT, GPIO_Servomotor_Pwm_C1_PIN);
 
     DL_GPIO_initPeripheralInputFunction(GPIO_EncoderCapture_C0_IOMUX,GPIO_EncoderCapture_C0_IOMUX_FUNC);
     DL_GPIO_initPeripheralInputFunction(GPIO_EncoderCapture_C1_IOMUX,GPIO_EncoderCapture_C1_IOMUX_FUNC);
@@ -363,6 +372,50 @@ SYSCONFIG_WEAK void SYSCFG_DL_Motor_Pwm_init(void) {
 
     
     DL_TimerA_setCCPDirection(Motor_Pwm_INST , DL_TIMER_CC0_OUTPUT | DL_TIMER_CC1_OUTPUT );
+
+
+}
+/*
+ * Timer clock configuration to be sourced by  / 1 (80000000 Hz)
+ * timerClkFreq = (timerClkSrc / (timerClkDivRatio * (timerClkPrescale + 1)))
+ *   1000000 Hz = 80000000 Hz / (1 * (79 + 1))
+ */
+static const DL_TimerG_ClockConfig gServomotor_PwmClockConfig = {
+    .clockSel = DL_TIMER_CLOCK_BUSCLK,
+    .divideRatio = DL_TIMER_CLOCK_DIVIDE_1,
+    .prescale = 79U
+};
+
+static const DL_TimerG_PWMConfig gServomotor_PwmConfig = {
+    .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN_UP,
+    .period = 20000,
+    .isTimerWithFourCC = true,
+    .startTimer = DL_TIMER_START,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_Servomotor_Pwm_init(void) {
+
+    DL_TimerG_setClockConfig(
+        Servomotor_Pwm_INST, (DL_TimerG_ClockConfig *) &gServomotor_PwmClockConfig);
+
+    DL_TimerG_initPWMMode(
+        Servomotor_Pwm_INST, (DL_TimerG_PWMConfig *) &gServomotor_PwmConfig);
+
+    // Set Counter control to the smallest CC index being used
+    DL_TimerG_setCounterControl(Servomotor_Pwm_INST,DL_TIMER_CZC_CCCTL1_ZCOND,DL_TIMER_CAC_CCCTL1_ACOND,DL_TIMER_CLC_CCCTL1_LCOND);
+
+    DL_TimerG_setCaptureCompareOutCtl(Servomotor_Pwm_INST, DL_TIMER_CC_OCTL_INIT_VAL_LOW,
+		DL_TIMER_CC_OCTL_INV_OUT_DISABLED, DL_TIMER_CC_OCTL_SRC_FUNCVAL,
+		DL_TIMERG_CAPTURE_COMPARE_1_INDEX);
+
+    DL_TimerG_setCaptCompUpdateMethod(Servomotor_Pwm_INST, DL_TIMER_CC_UPDATE_METHOD_IMMEDIATE, DL_TIMERG_CAPTURE_COMPARE_1_INDEX);
+    DL_TimerG_setCaptureCompareValue(Servomotor_Pwm_INST, 0, DL_TIMER_CC_1_INDEX);
+
+    DL_TimerG_enableClock(Servomotor_Pwm_INST);
+
+
+    
+    DL_TimerG_setCCPDirection(Servomotor_Pwm_INST , DL_TIMER_CC1_OUTPUT );
 
 
 }

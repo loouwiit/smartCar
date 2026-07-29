@@ -103,6 +103,18 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_Motor_Pwm_C1_IOMUX_FUNC                 IOMUX_PINCM38_PF_TIMA1_CCP1
 #define GPIO_Motor_Pwm_C1_IDX                                DL_TIMER_CC_1_INDEX
 
+/* Defines for Servomotor_Pwm */
+#define Servomotor_Pwm_INST                                                TIMG6
+#define Servomotor_Pwm_INST_IRQHandler                          TIMG6_IRQHandler
+#define Servomotor_Pwm_INST_INT_IRQN                            (TIMG6_INT_IRQn)
+#define Servomotor_Pwm_INST_CLK_FREQ                                     1000000
+/* GPIO defines for channel 1 */
+#define GPIO_Servomotor_Pwm_C1_PORT                                        GPIOB
+#define GPIO_Servomotor_Pwm_C1_PIN                                 DL_GPIO_PIN_7
+#define GPIO_Servomotor_Pwm_C1_IOMUX                             (IOMUX_PINCM24)
+#define GPIO_Servomotor_Pwm_C1_IOMUX_FUNC             IOMUX_PINCM24_PF_TIMG6_CCP1
+#define GPIO_Servomotor_Pwm_C1_IDX                           DL_TIMER_CC_1_INDEX
+
 
 
 /* Defines for EncoderCapture */
@@ -255,6 +267,7 @@ void SYSCFG_DL_SYSCTL_init(void);
 
 bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 void SYSCFG_DL_Motor_Pwm_init(void);
+void SYSCFG_DL_Servomotor_Pwm_init(void);
 void SYSCFG_DL_EncoderCapture_init(void);
 void SYSCFG_DL_I2C_MPU6050_init(void);
 void SYSCFG_DL_UART_0_init(void);

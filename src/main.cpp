@@ -19,6 +19,7 @@ void motorThread(void*);
 void uartThread(void*);
 void graySensorThread(void*);
 void keyThread(void*);
+void servemoterThread(void*);
 
 int main(void)
 {
@@ -52,6 +53,7 @@ void mainThread(void*)
 	xTaskCreate(uartThread, "uart", 0x200, nullptr, 2, nullptr);
 	xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
+	xTaskCreate(servemoterThread, "servemoter", 0x100, nullptr, 1, nullptr);
 }
 
 void uartInit()
