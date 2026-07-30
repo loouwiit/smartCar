@@ -75,7 +75,7 @@ CPPFLAGS += -I. \
     -mcpu=cortex-m0plus \
     -march=armv6-m \
     -mthumb \
-    -std=c++11 \
+    -std=gnu++14 \
     -mfloat-abi=soft \
     -ffunction-sections \
     -fdata-sections \

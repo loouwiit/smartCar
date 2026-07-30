@@ -147,7 +147,7 @@
 /******************************************************************************/
 #if defined(__GNUC__)
 	#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 1
-	#define configUSE_NEWLIB_REENTRANT 1
+	#define configUSE_NEWLIB_REENTRANT 0
 #endif
 
 /******************************************************************************/
