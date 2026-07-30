@@ -22,7 +22,7 @@ extern int moveCount[2];
 extern FPID fpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
-extern Script<float> script[2];
+extern Script<float, 10> script[2];
 extern Serve serve;
 extern GraySensor graySensor;
 
@@ -238,7 +238,7 @@ void dealRecieve(char* recieve)
 			vTaskDelay(1);
 		}
 
-		Script<float, 5U>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+		Script<float, 10>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
 
 		int delay{};
 		int duration{};

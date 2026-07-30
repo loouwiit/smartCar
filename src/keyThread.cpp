@@ -16,7 +16,7 @@
 
 extern UART uart;
 extern Mixer<float, MixNumber::Count> mixer[2];
-extern Script<float> script[2];
+extern Script<float, 10> script[2];
 
 extern bool grayEnable;
 extern bool calibrating;
@@ -76,7 +76,7 @@ void keyThread(void*)
 			vTaskDelay(1);
 		}
 
-		Script<float, 5U>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+		Script<float, 10>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
 
 		for (auto& i : scriptEntry)
 		{

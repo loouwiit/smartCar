@@ -24,7 +24,7 @@ Motor motor[2]{
 	{{{Motor_B2_PORT, Motor_B2_PIN}, {Motor_B1_PORT, Motor_B1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_1_INDEX}} };
 FPID fpid[2]{};
 Mixer<float, MixNumber::Count> mixer[2]{};
-Script<float> script[2]{};
+Script<float, 10> script[2]{};
 
 float predict(float target, void*)
 {
