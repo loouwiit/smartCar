@@ -140,6 +140,36 @@ void UART::Interrupt(UARTId uartId, DL_UART_IIDX event)
 		rxBufferOld.bufferDataSize = count;
 		break;
 	}
+	case DL_UART_MAIN_IIDX_RX:
+	{
+		// 仅在超时触发时才做收尾（DMA部分传输未完成）
+		// 正常FIFO阈值触发时DMA正常工作，直接跳过
+		auto remaining = DL_DMA_getTransferSize(DMA, UART::dmaChannalRx[uartId]);
+		auto bufSize = UART::bufferRx[uartId][UART::bufferRxWriteIndex[uartId]].bufferMemSize;
+		if (remaining == 0 || remaining == bufSize)
+			break;
+
+		// 超时触发：收尾当前DMA缓冲区（逻辑同RX_TIMEOUT_ERROR）
+		auto& writeIndex = UART::bufferRxWriteIndex[uartId];
+		auto& rxBufferOld = UART::bufferRx[uartId][writeIndex];
+
+		writeIndex++;
+		writeIndex %= UART::bufferRxCount[uartId];
+
+		auto& rxBuffer = UART::bufferRx[uartId][writeIndex];
+
+		DL_DMA_disableChannel(DMA, UART::dmaChannalRx[uartId]);
+		DL_DMA_setDestAddr(DMA, UART::dmaChannalRx[uartId], (uint32_t)rxBuffer.buffer);
+		DL_DMA_setTransferSize(DMA, UART::dmaChannalRx[uartId], rxBuffer.bufferMemSize);
+		DL_DMA_enableChannel(DMA, UART::dmaChannalRx[uartId]);
+
+		unsigned short count = rxBufferOld.bufferMemSize - remaining;
+		while (!DL_UART_isRXFIFOEmpty(uartInctance[uartId]))
+			rxBufferOld.buffer[count++] = DL_UART_receiveData(uartInctance[uartId]);
+
+		rxBufferOld.bufferDataSize = count;
+		break;
+	}
 	case DL_UART_MAIN_IIDX_DMA_DONE_RX:
 	{
 		auto& writeIndex = UART::bufferRxWriteIndex[uartId];

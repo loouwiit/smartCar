@@ -66,4 +66,8 @@ void uartInit()
 	NVIC_EnableIRQ(UartSystem_INST_INT_IRQN);
 
 	uart = UART{ {UartSystem_INST}, DMA_RX_CHAN_ID, rxBufferSize, rxBufferCount, DMA_TX_CHAN_ID };
+
+	// 启用RX FIFO中断，配合setRXInterruptTimeout使用
+	// 当DMA最后一部分缓冲区因FIFO未达阈值而停滞时，超时触发此中断来收尾
+	DL_UART_Main_enableInterrupt(UartSystem_INST, DL_UART_MAIN_INTERRUPT_RX);
 }
