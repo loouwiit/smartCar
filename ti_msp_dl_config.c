@@ -43,6 +43,7 @@
 DL_TimerA_backupConfig gMotor_PwmBackup;
 DL_TimerG_backupConfig gServomotor_PwmBackup;
 DL_TimerA_backupConfig gEncoderCaptureBackup;
+DL_UART_Main_backupConfig gUartDataBackup;
 
 /*
  *  ======== SYSCFG_DL_init ========
@@ -59,13 +60,14 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_EncoderCapture_init();
     SYSCFG_DL_I2C_OLED_init();
     SYSCFG_DL_UartSystem_init();
+    SYSCFG_DL_UartData_init();
     SYSCFG_DL_GraySensorAdc_init();
     SYSCFG_DL_DMA_init();
     /* Ensure backup structures have no valid state */
 	gMotor_PwmBackup.backupRdy 	= false;
 	gServomotor_PwmBackup.backupRdy 	= false;
 	gEncoderCaptureBackup.backupRdy 	= false;
-
+	gUartDataBackup.backupRdy 	= false;
 
 }
 /*
@@ -79,6 +81,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_saveConfiguration(void)
 	retStatus &= DL_TimerA_saveConfiguration(Motor_Pwm_INST, &gMotor_PwmBackup);
 	retStatus &= DL_TimerG_saveConfiguration(Servomotor_Pwm_INST, &gServomotor_PwmBackup);
 	retStatus &= DL_TimerA_saveConfiguration(EncoderCapture_INST, &gEncoderCaptureBackup);
+	retStatus &= DL_UART_Main_saveConfiguration(UartData_INST, &gUartDataBackup);
 
     return retStatus;
 }
@@ -91,6 +94,7 @@ SYSCONFIG_WEAK bool SYSCFG_DL_restoreConfiguration(void)
 	retStatus &= DL_TimerA_restoreConfiguration(Motor_Pwm_INST, &gMotor_PwmBackup, false);
 	retStatus &= DL_TimerG_restoreConfiguration(Servomotor_Pwm_INST, &gServomotor_PwmBackup, false);
 	retStatus &= DL_TimerA_restoreConfiguration(EncoderCapture_INST, &gEncoderCaptureBackup, false);
+	retStatus &= DL_UART_Main_restoreConfiguration(UartData_INST, &gUartDataBackup);
 
     return retStatus;
 }
@@ -104,6 +108,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerA_reset(EncoderCapture_INST);
     DL_I2C_reset(I2C_OLED_INST);
     DL_UART_Main_reset(UartSystem_INST);
+    DL_UART_Main_reset(UartData_INST);
     DL_ADC12_reset(GraySensorAdc_INST);
 
 
@@ -114,6 +119,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerA_enablePower(EncoderCapture_INST);
     DL_I2C_enablePower(I2C_OLED_INST);
     DL_UART_Main_enablePower(UartSystem_INST);
+    DL_UART_Main_enablePower(UartData_INST);
     DL_ADC12_enablePower(GraySensorAdc_INST);
 
     delay_cycles(POWER_STARTUP_DELAY);
@@ -149,6 +155,13 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     
 	DL_GPIO_initPeripheralInputFunctionFeatures(
 		 GPIO_UartSystem_IOMUX_RX, GPIO_UartSystem_IOMUX_RX_FUNC,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+    DL_GPIO_initPeripheralOutputFunction(
+        GPIO_UartData_IOMUX_TX, GPIO_UartData_IOMUX_TX_FUNC);
+    
+	DL_GPIO_initPeripheralInputFunctionFeatures(
+		 GPIO_UartData_IOMUX_RX, GPIO_UartData_IOMUX_RX_FUNC,
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
@@ -563,6 +576,55 @@ SYSCONFIG_WEAK void SYSCFG_DL_UartSystem_init(void)
 
     DL_UART_Main_enable(UartSystem_INST);
 }
+static const DL_UART_Main_ClockConfig gUartDataClockConfig = {
+    .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
+    .divideRatio = DL_UART_MAIN_CLOCK_DIVIDE_RATIO_1
+};
+
+static const DL_UART_Main_Config gUartDataConfig = {
+    .mode        = DL_UART_MAIN_MODE_NORMAL,
+    .direction   = DL_UART_MAIN_DIRECTION_TX_RX,
+    .flowControl = DL_UART_MAIN_FLOW_CONTROL_NONE,
+    .parity      = DL_UART_MAIN_PARITY_NONE,
+    .wordLength  = DL_UART_MAIN_WORD_LENGTH_8_BITS,
+    .stopBits    = DL_UART_MAIN_STOP_BITS_ONE
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_UartData_init(void)
+{
+    DL_UART_Main_setClockConfig(UartData_INST, (DL_UART_Main_ClockConfig *) &gUartDataClockConfig);
+
+    DL_UART_Main_init(UartData_INST, (DL_UART_Main_Config *) &gUartDataConfig);
+    /*
+     * Configure baud rate by setting oversampling and baud rate divisors.
+     *  Target baud rate: 115200
+     *  Actual baud rate: 115190.78
+     */
+    DL_UART_Main_setOversampling(UartData_INST, DL_UART_OVERSAMPLING_RATE_16X);
+    DL_UART_Main_setBaudRateDivisor(UartData_INST, UartData_IBRD_80_MHZ_115200_BAUD, UartData_FBRD_80_MHZ_115200_BAUD);
+
+
+    /* Configure Interrupts */
+    DL_UART_Main_enableInterrupt(UartData_INST,
+                                 DL_UART_MAIN_INTERRUPT_DMA_DONE_RX |
+                                 DL_UART_MAIN_INTERRUPT_DMA_DONE_TX |
+                                 DL_UART_MAIN_INTERRUPT_RX_TIMEOUT_ERROR);
+    /* Setting the Interrupt Priority */
+    NVIC_SetPriority(UartData_INST_INT_IRQN, 1);
+
+    /* Configure DMA Receive Event */
+    DL_UART_Main_enableDMAReceiveEvent(UartData_INST, DL_UART_DMA_INTERRUPT_RX);
+    /* Configure DMA Transmit Event */
+    DL_UART_Main_enableDMATransmitEvent(UartData_INST);
+    /* Configure FIFOs */
+    DL_UART_Main_enableFIFOs(UartData_INST);
+    DL_UART_Main_setRXFIFOThreshold(UartData_INST, DL_UART_RX_FIFO_LEVEL_1_2_FULL);
+    DL_UART_Main_setTXFIFOThreshold(UartData_INST, DL_UART_TX_FIFO_LEVEL_1_2_EMPTY);
+
+    DL_UART_Main_setRXInterruptTimeout(UartData_INST, 1);
+
+    DL_UART_Main_enable(UartData_INST);
+}
 
 /* GraySensorAdc Initialization */
 static const DL_ADC12_ClockConfig gGraySensorAdcClockConfig = {
@@ -581,7 +643,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_GraySensorAdc_init(void)
     DL_ADC12_enableConversions(GraySensorAdc_INST);
 }
 
-static const DL_DMA_Config gDMA_RXConfig = {
+static const DL_DMA_Config gDMA_RX_SYSTEMConfig = {
     .transferMode   = DL_DMA_SINGLE_TRANSFER_MODE,
     .extendedMode   = DL_DMA_NORMAL_MODE,
     .destIncrement  = DL_DMA_ADDR_INCREMENT,
@@ -592,11 +654,11 @@ static const DL_DMA_Config gDMA_RXConfig = {
     .triggerType    = DL_DMA_TRIGGER_TYPE_EXTERNAL,
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_DMA_RX_init(void)
+SYSCONFIG_WEAK void SYSCFG_DL_DMA_RX_SYSTEM_init(void)
 {
-    DL_DMA_initChannel(DMA, DMA_RX_CHAN_ID , (DL_DMA_Config *) &gDMA_RXConfig);
+    DL_DMA_initChannel(DMA, DMA_RX_SYSTEM_CHAN_ID , (DL_DMA_Config *) &gDMA_RX_SYSTEMConfig);
 }
-static const DL_DMA_Config gDMA_TXConfig = {
+static const DL_DMA_Config gDMA_TX_SYSTEMConfig = {
     .transferMode   = DL_DMA_SINGLE_TRANSFER_MODE,
     .extendedMode   = DL_DMA_NORMAL_MODE,
     .destIncrement  = DL_DMA_ADDR_UNCHANGED,
@@ -607,13 +669,45 @@ static const DL_DMA_Config gDMA_TXConfig = {
     .triggerType    = DL_DMA_TRIGGER_TYPE_EXTERNAL,
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_DMA_TX_init(void)
+SYSCONFIG_WEAK void SYSCFG_DL_DMA_TX_SYSTEM_init(void)
 {
-    DL_DMA_initChannel(DMA, DMA_TX_CHAN_ID , (DL_DMA_Config *) &gDMA_TXConfig);
+    DL_DMA_initChannel(DMA, DMA_TX_SYSTEM_CHAN_ID , (DL_DMA_Config *) &gDMA_TX_SYSTEMConfig);
+}
+static const DL_DMA_Config gDMA_RX_DATAConfig = {
+    .transferMode   = DL_DMA_SINGLE_TRANSFER_MODE,
+    .extendedMode   = DL_DMA_NORMAL_MODE,
+    .destIncrement  = DL_DMA_ADDR_INCREMENT,
+    .srcIncrement   = DL_DMA_ADDR_UNCHANGED,
+    .destWidth      = DL_DMA_WIDTH_BYTE,
+    .srcWidth       = DL_DMA_WIDTH_BYTE,
+    .trigger        = UartData_INST_DMA_TRIGGER_0,
+    .triggerType    = DL_DMA_TRIGGER_TYPE_EXTERNAL,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_DMA_RX_DATA_init(void)
+{
+    DL_DMA_initChannel(DMA, DMA_RX_DATA_CHAN_ID , (DL_DMA_Config *) &gDMA_RX_DATAConfig);
+}
+static const DL_DMA_Config gDMA_TX_DATAConfig = {
+    .transferMode   = DL_DMA_SINGLE_TRANSFER_MODE,
+    .extendedMode   = DL_DMA_NORMAL_MODE,
+    .destIncrement  = DL_DMA_ADDR_UNCHANGED,
+    .srcIncrement   = DL_DMA_ADDR_INCREMENT,
+    .destWidth      = DL_DMA_WIDTH_BYTE,
+    .srcWidth       = DL_DMA_WIDTH_BYTE,
+    .trigger        = UartData_INST_DMA_TRIGGER_1,
+    .triggerType    = DL_DMA_TRIGGER_TYPE_EXTERNAL,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_DMA_TX_DATA_init(void)
+{
+    DL_DMA_initChannel(DMA, DMA_TX_DATA_CHAN_ID , (DL_DMA_Config *) &gDMA_TX_DATAConfig);
 }
 SYSCONFIG_WEAK void SYSCFG_DL_DMA_init(void){
-    SYSCFG_DL_DMA_RX_init();
-    SYSCFG_DL_DMA_TX_init();
+    SYSCFG_DL_DMA_RX_SYSTEM_init();
+    SYSCFG_DL_DMA_TX_SYSTEM_init();
+    SYSCFG_DL_DMA_RX_DATA_init();
+    SYSCFG_DL_DMA_TX_DATA_init();
 }
 
 

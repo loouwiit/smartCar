@@ -21,21 +21,21 @@ extern "C" void UART1_IRQHandler()
 {
 	auto interrupt = DL_UART_Main_getPendingInterrupt(UART1);
 	DL_UART_clearInterruptStatus(UART1, interrupt);
-	UART::Interrupt(UART::UARTId::UART1, DL_UART_Main_getPendingInterrupt(UART1));
+	UART::Interrupt(UART::UARTId::UART1, interrupt);
 }
 
 extern "C" void UART2_IRQHandler()
 {
 	auto interrupt = DL_UART_Main_getPendingInterrupt(UART2);
 	DL_UART_clearInterruptStatus(UART2, interrupt);
-	UART::Interrupt(UART::UARTId::UART2, DL_UART_Main_getPendingInterrupt(UART2));
+	UART::Interrupt(UART::UARTId::UART2, interrupt);
 }
 
 extern "C" void UART3_IRQHandler()
 {
 	auto interrupt = DL_UART_Main_getPendingInterrupt(UART3);
 	DL_UART_clearInterruptStatus(UART3, interrupt);
-	UART::Interrupt(UART::UARTId::UART3, DL_UART_Main_getPendingInterrupt(UART3));
+	UART::Interrupt(UART::UARTId::UART3, interrupt);
 }
 
 UART::UART(UARTId id, DMAChannal dmaChannalRx, unsigned short bufferRxSize, unsigned short bufferRxCount, DMAChannal dmaChannalTx) : id{ id }

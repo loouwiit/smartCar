@@ -169,6 +169,22 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define UartSystem_BAUD_RATE                                            (115200)
 #define UartSystem_IBRD_40_MHZ_115200_BAUD                                  (21)
 #define UartSystem_FBRD_40_MHZ_115200_BAUD                                  (45)
+/* Defines for UartData */
+#define UartData_INST                                                      UART3
+#define UartData_INST_FREQUENCY                                         80000000
+#define UartData_INST_IRQHandler                                UART3_IRQHandler
+#define UartData_INST_INT_IRQN                                    UART3_INT_IRQn
+#define GPIO_UartData_RX_PORT                                              GPIOA
+#define GPIO_UartData_TX_PORT                                              GPIOA
+#define GPIO_UartData_RX_PIN                                      DL_GPIO_PIN_13
+#define GPIO_UartData_TX_PIN                                      DL_GPIO_PIN_14
+#define GPIO_UartData_IOMUX_RX                                   (IOMUX_PINCM35)
+#define GPIO_UartData_IOMUX_TX                                   (IOMUX_PINCM36)
+#define GPIO_UartData_IOMUX_RX_FUNC                    IOMUX_PINCM35_PF_UART3_RX
+#define GPIO_UartData_IOMUX_TX_FUNC                    IOMUX_PINCM36_PF_UART3_TX
+#define UartData_BAUD_RATE                                              (115200)
+#define UartData_IBRD_80_MHZ_115200_BAUD                                    (43)
+#define UartData_FBRD_80_MHZ_115200_BAUD                                    (26)
 
 
 
@@ -188,12 +204,18 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 
 
 
-/* Defines for DMA_RX */
-#define DMA_RX_CHAN_ID                                                       (1)
+/* Defines for DMA_RX_SYSTEM */
+#define DMA_RX_SYSTEM_CHAN_ID                                                (3)
 #define UartSystem_INST_DMA_TRIGGER_0                        (DMA_UART0_RX_TRIG)
-/* Defines for DMA_TX */
-#define DMA_TX_CHAN_ID                                                       (0)
+/* Defines for DMA_TX_SYSTEM */
+#define DMA_TX_SYSTEM_CHAN_ID                                                (2)
 #define UartSystem_INST_DMA_TRIGGER_1                        (DMA_UART0_TX_TRIG)
+/* Defines for DMA_RX_DATA */
+#define DMA_RX_DATA_CHAN_ID                                                  (1)
+#define UartData_INST_DMA_TRIGGER_0                          (DMA_UART3_RX_TRIG)
+/* Defines for DMA_TX_DATA */
+#define DMA_TX_DATA_CHAN_ID                                                  (0)
+#define UartData_INST_DMA_TRIGGER_1                          (DMA_UART3_TX_TRIG)
 
 
 /* Port definition for Pin Group GPIO_MPU6050 */
@@ -271,6 +293,7 @@ void SYSCFG_DL_Servomotor_Pwm_init(void);
 void SYSCFG_DL_EncoderCapture_init(void);
 void SYSCFG_DL_I2C_OLED_init(void);
 void SYSCFG_DL_UartSystem_init(void);
+void SYSCFG_DL_UartData_init(void);
 void SYSCFG_DL_GraySensorAdc_init(void);
 void SYSCFG_DL_DMA_init(void);
 

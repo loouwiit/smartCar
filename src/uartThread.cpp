@@ -42,8 +42,8 @@ static unsigned char rxSplitSize = 0;
 static int rxSize = 0;
 static int rxTotolSize = 0;
 
-void dealRecieve(char* recieve);
-unsigned char splitCommand(char* text, char** commands, char splitChar = ' ');
+static void dealRecieve(char* recieve);
+static unsigned char splitCommand(char* text, char** commands, char splitChar = ' ');
 
 void uartThread(void*)
 {
