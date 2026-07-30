@@ -19,7 +19,7 @@ public:
 	void disable(unsigned index) { disableCount[index]++; if (disableCount[index] != 0) mix(); }
 
 	// enable会处理mix
-	void enable(unsigned index) { disableCount[index]--; if (disableCount[index] == 0) mix(); }
+	void enable(unsigned index) { if (disableCount[index] == 0) return; disableCount[index]--; if (disableCount[index] == 0) mix(); }
 
 	unsigned char isDisable(unsigned index) { return disableCount[index]; }
 
