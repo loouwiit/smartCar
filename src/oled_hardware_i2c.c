@@ -2,6 +2,8 @@
 #include "oledfont.h"
 #include "clock.h"
 
+#include "FreeRTOS.h"
+
 #define I2C_TIMEOUT_MS  (10)
 
 //OLED的显存
