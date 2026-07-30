@@ -12,9 +12,11 @@
 #include "gpioInterrupt.hpp"
 #include "fpid.hpp"
 #include "mixer.hpp"
+#include "script.hpp"
 
 extern UART uart;
 extern Mixer<float, MixNumber::Count> mixer[2];
+extern Script<float> script[2];
 
 extern bool grayEnable;
 extern bool calibrating;
@@ -60,8 +62,35 @@ void keyThread(void*)
 
 		targetCount = moveCount[0] + moveCount[1] + roundCount * 2;
 
-		mixer[0][MixNumber::Key] = +KeySpeed;
-		mixer[1][MixNumber::Key] = +KeySpeed;
+		int scriptIndex[2]{};
+
+		while (true)
+		{
+			scriptIndex[0] = script[0].getFreeScriptEntryIndex();
+			scriptIndex[1] = script[1].getFreeScriptEntryIndex();
+			if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
+				break;
+			while (uart.isTransiting())
+				vTaskDelay(1);
+			uart.transit("cannot find free script entry!\n", 31);
+			vTaskDelay(1);
+		}
+
+		while (uart.isTransiting())
+			vTaskDelay(1);
+
+		Script<float, 5U>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+
+		for (auto& i : scriptEntry)
+		{
+			i->startTime = 0;
+			i->expireTime = portMAX_DELAY;
+			i->strength = +KeySpeed;
+		}
+
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		uart.transit("started\n", 8);
 
 		mixer[0].enable(MixNumber::GraySensor);
 		mixer[1].enable(MixNumber::GraySensor);
@@ -105,8 +134,8 @@ void stop()
 
 	grayEnable = false;
 
-	mixer[0][MixNumber::Key] = 0.0f;
-	mixer[1][MixNumber::Key] = 0.0f;
+	script[0].clear();
+	script[1].clear();
 
 	mixer[0].disable(MixNumber::GraySensor);
 	mixer[1].disable(MixNumber::GraySensor);

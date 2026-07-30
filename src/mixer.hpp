@@ -39,7 +39,7 @@ public:
 	enum : unsigned char {
 		Uart,
 		GraySensor,
-		Key,
+		Script,
 
 		Count,
 	};

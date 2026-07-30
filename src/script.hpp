@@ -17,6 +17,11 @@ public:
 
 	auto& operator[](unsigned index) { return script[index]; }
 
+	void clear()
+	{
+		for (auto& i : script) i = {};
+	}
+
 	auto getFreeScriptEntryIndex()
 	{
 		for (int i = 0; i < Size; ++i) if (script[i].startTime == portMAX_DELAY) return i;

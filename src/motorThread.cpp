@@ -11,6 +11,7 @@
 #include "fpid.hpp"
 #include "uart.hpp"
 #include "mixer.hpp"
+#include "script.hpp"
 
 extern UART uart;
 
@@ -22,7 +23,8 @@ Motor motor[2]{
 	{{{Motor_A2_PORT, Motor_A2_PIN}, {Motor_A1_PORT, Motor_A1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_0_INDEX}},
 	{{{Motor_B2_PORT, Motor_B2_PIN}, {Motor_B1_PORT, Motor_B1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_1_INDEX}} };
 FPID fpid[2]{};
-Mixer<float, MixNumber::Count> mixer[2];
+Mixer<float, MixNumber::Count> mixer[2]{};
+Script<float> script[2]{};
 
 float predict(float target, void*)
 {
@@ -35,11 +37,17 @@ void motorThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
 
-	mixer[0].setMixCallback([]() { fpid[0].setTarget(mixer[0]); });
-	mixer[1].setMixCallback([]() {fpid[1].setTarget(mixer[1]); });
+	mixer[0].setMixCallback([]()
+		{
+			mixer[0][MixNumber::Script] = script[0].getScriptTotol(xTaskGetTickCount());
+			fpid[0].setTarget(mixer[0]);
+		});
 
-	mixer[0].mix();
-	mixer[1].mix();
+	mixer[1].setMixCallback([]()
+		{
+			mixer[1][MixNumber::Script] = script[1].getScriptTotol(xTaskGetTickCount());
+			fpid[1].setTarget(mixer[1]);
+		});
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -74,6 +82,7 @@ void motorThread(void*)
 		{
 			if (captureSpeeds[i] == 0.0f && fpid[i].getTarget() == 0.0f) fpid[i].clearIntegration();
 
+			mixer[i].mix();
 			fpid[i].update(captureSpeeds[i], nowTime - lastPidTime);
 			motor[i].setSpeed((int)fpid[i]);
 		}

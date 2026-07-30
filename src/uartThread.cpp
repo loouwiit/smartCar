@@ -215,7 +215,6 @@ void dealRecieve(char* recieve)
 		float speed = atof(rxBufferSplit[2]);
 
 		mixer[index][MixNumber::Uart] = speed;
-		mixer[index].mix();
 		fpid[index].setTarget(mixer[index]);
 
 		if (speed == 0)
@@ -237,11 +236,9 @@ void dealRecieve(char* recieve)
 		vTaskDelay(delay);
 
 		mixer[0][MixNumber::Uart] = speedLeft;
-		mixer[0].mix();
 		fpid[0].setTarget(mixer[0]);
 
 		mixer[1][MixNumber::Uart] = speedRight;
-		mixer[1].mix();
 		fpid[1].setTarget(mixer[1]);
 
 		for (int i = 0; i < 2;i++)

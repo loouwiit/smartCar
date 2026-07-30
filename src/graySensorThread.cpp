@@ -89,9 +89,6 @@ void graySensorThread(void*)
 
 			mixer[0][MixNumber::GraySensor] = +graySpeed;
 			mixer[1][MixNumber::GraySensor] = -graySpeed;
-
-			mixer[0].mix();
-			mixer[1].mix();
 		}
 
 		vTaskDelay(5);
