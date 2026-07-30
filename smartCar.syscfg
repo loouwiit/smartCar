@@ -87,7 +87,7 @@ GPIO1.associatedPins.create(4);
 GPIO1.associatedPins[0].$name       = "A1";
 GPIO1.associatedPins[0].pin.$assign = "boosterpack.6";
 GPIO1.associatedPins[1].$name       = "A2";
-GPIO1.associatedPins[1].pin.$assign = "boosterpack.26";
+GPIO1.associatedPins[1].pin.$assign = "boosterpack.25";
 GPIO1.associatedPins[2].$name       = "B1";
 GPIO1.associatedPins[2].pin.$assign = "boosterpack.7";
 GPIO1.associatedPins[3].$name       = "B2";

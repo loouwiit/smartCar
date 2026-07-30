@@ -224,10 +224,10 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define Motor_A1_PORT                                                    (GPIOB)
 #define Motor_A1_PIN                                            (DL_GPIO_PIN_24)
 #define Motor_A1_IOMUX                                           (IOMUX_PINCM52)
-/* Defines for A2: GPIOA.18 with pinCMx 40 on package pin 11 */
-#define Motor_A2_PORT                                                    (GPIOA)
+/* Defines for A2: GPIOB.18 with pinCMx 44 on package pin 15 */
+#define Motor_A2_PORT                                                    (GPIOB)
 #define Motor_A2_PIN                                            (DL_GPIO_PIN_18)
-#define Motor_A2_IOMUX                                           (IOMUX_PINCM40)
+#define Motor_A2_IOMUX                                           (IOMUX_PINCM44)
 /* Defines for B1: GPIOB.9 with pinCMx 26 on package pin 61 */
 #define Motor_B1_PORT                                                    (GPIOB)
 #define Motor_B1_PIN                                             (DL_GPIO_PIN_9)
