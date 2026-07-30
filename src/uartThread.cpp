@@ -25,6 +25,7 @@ extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<float, 10> script[2];
 extern Serve serve;
 extern GraySensor graySensor;
+extern bool grayEnable;
 
 extern int RoundCount;
 
@@ -184,6 +185,24 @@ void dealRecieve(char* recieve)
 		freeEntry.startTime = xTaskGetTickCount() + offset;
 		freeEntry.expireTime = freeEntry.startTime + pdMS_TO_TICKS(duration);
 		freeEntry.strength = strength;
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "track", 5))
+	{
+		if (rxSplitSize <= 1) return;
+		if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'n')
+		{
+			grayEnable = true;
+
+			mixer[0].enable(MixNumber::GraySensor);
+			mixer[1].enable(MixNumber::GraySensor);
+		}
+		else if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'f' && rxBufferSplit[1][2] == 'f')
+		{
+			grayEnable = false;
+
+			mixer[0].disable(MixNumber::GraySensor);
+			mixer[1].disable(MixNumber::GraySensor);
+		}
 	}
 	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
 	{
