@@ -226,9 +226,15 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize < 3) return;
 		float speed = atof(rxBufferSplit[1]);
 		float rotate = atof(rxBufferSplit[2]);
+		int delay = 0;
+
+		if (rxSplitSize > 3)
+			delay = atoi(rxBufferSplit[3]);
 
 		float speedLeft = speed - rotate;
 		float speedRight = speed + rotate;
+
+		vTaskDelay(delay);
 
 		mixer[0][MixNumber::Uart] = speedLeft;
 		mixer[0].mix();
