@@ -8,6 +8,9 @@
 #include "autoDeleteThread.hpp"
 #include "serve.hpp"
 
+static char txBuffer[64]{};
+static int txSize{};
+
 extern UART uart;
 
 Serve serve{ { Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX } };  // 500 - 2500
@@ -15,8 +18,6 @@ Serve serve{ { Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX } };  // 500 - 25
 void servemoterThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
-	char txBuffer[128]{};
-	int txSize{};
 
 	while (uart.isTransiting())
 		vTaskDelay(1);
@@ -26,6 +27,7 @@ void servemoterThread(void*)
 
 	while (true)
 	{
+		serve[Serve::MixNumber::Script] = serve.getScriptTotol(xTaskGetTickCount());
 		serve.mix();
 		vTaskDelay(10);
 	}

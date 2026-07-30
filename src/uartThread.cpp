@@ -172,6 +172,28 @@ void dealRecieve(char* recieve)
 		txSize = sprintf(txBuffer, "set to %d\n", target);
 		uart.transit(txBuffer, txSize);
 	}
+	else if (rxBufferSplit[0][0] == 's' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "script", 6))
+	{
+		if (rxSplitSize <= 2) return;
+		int strength = atoi(rxBufferSplit[1]);
+		int duration = atoi(rxBufferSplit[2]);
+		int offset = 0;
+		if (rxSplitSize > 3)
+			offset = atoi(rxBufferSplit[3]);
+
+		int freeEntryIndex = serve.getFreeScriptEntryIndex();
+		if (freeEntryIndex == -1)
+		{
+			while (uart.isTransiting())
+				vTaskDelay(1);
+			uart.transit("no free script entry!", 21);
+			return;
+		}
+		auto& freeEntry = serve.script[freeEntryIndex];
+		freeEntry.startTime = xTaskGetTickCount() + offset;
+		freeEntry.expireTime = freeEntry.startTime + pdMS_TO_TICKS(duration);
+		freeEntry.strength = strength;
+	}
 	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
 	{
 		if (rxSplitSize < 4) return;
