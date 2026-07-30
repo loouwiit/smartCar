@@ -14,6 +14,7 @@
 #include "stringCompare.hpp"
 #include "mixer.hpp"
 #include "graySensor.hpp"
+#include "serve.hpp"
 
 extern UART uart;
 extern float captureSpeeds[2];
@@ -21,7 +22,7 @@ extern int moveCount[2];
 extern FPID fpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
-extern PWM servePwm;
+extern Serve serve;
 extern GraySensor graySensor;
 
 extern int turnContorl;
@@ -116,7 +117,7 @@ void dealRecieve(char* recieve)
 	if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
-		int target = servePwm;
+		int target = serve;
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
@@ -124,10 +125,10 @@ void dealRecieve(char* recieve)
 		target += delta;
 		if (target >= 2500)
 			target = 2500 - 1;
-		servePwm = target;
+		serve[Serve::MixNumber::Uart] = target;
 
 		vTaskDelay(pdMS_TO_TICKS(200));
-		servePwm = 2335;
+		serve[Serve::MixNumber::Uart] = Serve::StandardBalancePoint;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -137,7 +138,7 @@ void dealRecieve(char* recieve)
 	else if (rxBufferSplit[0][0] == '-')
 	{
 		int delta = 10;
-		int target = servePwm;
+		int target = serve[Serve::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
@@ -145,10 +146,10 @@ void dealRecieve(char* recieve)
 		target -= delta;
 		if (target < 500)
 			target = 500;
-		servePwm = target;
+		serve[Serve::MixNumber::Uart] = target;
 
 		vTaskDelay(pdMS_TO_TICKS(200));
-		servePwm = 2335;
+		serve[Serve::MixNumber::Uart] = Serve::StandardBalancePoint;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -164,13 +165,13 @@ void dealRecieve(char* recieve)
 			target = atoi(rxBufferSplit[1]);
 		else target = atoi(rxBufferSplit[0] + 1);
 		if (target == 0)
-			target = 2335;
+			target = Serve::StandardBalancePoint;
 
 		if (target < 500)
 			target = 500;
 		if (target >= 2500)
 			target = 2500 - 1;
-		servePwm = target;
+		serve[Serve::MixNumber::Uart] = target;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
