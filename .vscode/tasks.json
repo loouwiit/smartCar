@@ -12,6 +12,11 @@
 			"label": "flash",
 			"type": "shell",
 			"command": "pyocd flash --target mspm0g3507 build/smartCar.elf"
+		},
+		{
+			"label": "reset",
+			"type": "shell",
+			"command": "pyocd reset --method hw --target mspm0g3507"
 		}
 	]
 }
