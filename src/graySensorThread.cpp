@@ -12,8 +12,8 @@
 extern UART uart;
 GraySensor graySensor = { {GraySensor_GraySensorA_PORT, GraySensor_GraySensorA_PIN},{GraySensor_GraySensorB_PORT, GraySensor_GraySensorB_PIN},{GraySensor_GraySensorC_PORT, GraySensor_GraySensorC_PIN}, GraySensorAdc_INST,GraySensorAdc_ADCMEM_Cha };
 
-char txBuffer[64]{};
-int txSize = 0;
+static char txBuffer[64]{};
+static int txSize = 0;
 extern FPID fpid[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
 float grayMoveSpeed = 0.1f;
