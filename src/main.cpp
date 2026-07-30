@@ -62,8 +62,8 @@ void mainThread(void*)
 
 void uartInit()
 {
-	NVIC_ClearPendingIRQ(UART_0_INST_INT_IRQN);
-	NVIC_EnableIRQ(UART_0_INST_INT_IRQN);
+	NVIC_ClearPendingIRQ(UartSystem_INST_INT_IRQN);
+	NVIC_EnableIRQ(UartSystem_INST_INT_IRQN);
 
-	uart = UART{ {UART_0_INST}, DMA_RX_CHAN_ID, rxBufferSize, rxBufferCount, DMA_TX_CHAN_ID };
+	uart = UART{ {UartSystem_INST}, DMA_RX_CHAN_ID, rxBufferSize, rxBufferCount, DMA_TX_CHAN_ID };
 }

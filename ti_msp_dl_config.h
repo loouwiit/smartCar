@@ -153,22 +153,38 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_I2C_OLED_IOMUX_SCL_FUNC                   IOMUX_PINCM15_PF_I2C1_SCL
 
 
-/* Defines for UART_0 */
-#define UART_0_INST                                                        UART0
-#define UART_0_INST_FREQUENCY                                           40000000
-#define UART_0_INST_IRQHandler                                  UART0_IRQHandler
-#define UART_0_INST_INT_IRQN                                      UART0_INT_IRQn
-#define GPIO_UART_0_RX_PORT                                                GPIOA
-#define GPIO_UART_0_TX_PORT                                                GPIOA
-#define GPIO_UART_0_RX_PIN                                        DL_GPIO_PIN_11
-#define GPIO_UART_0_TX_PIN                                        DL_GPIO_PIN_10
-#define GPIO_UART_0_IOMUX_RX                                     (IOMUX_PINCM22)
-#define GPIO_UART_0_IOMUX_TX                                     (IOMUX_PINCM21)
-#define GPIO_UART_0_IOMUX_RX_FUNC                      IOMUX_PINCM22_PF_UART0_RX
-#define GPIO_UART_0_IOMUX_TX_FUNC                      IOMUX_PINCM21_PF_UART0_TX
-#define UART_0_BAUD_RATE                                                (115200)
-#define UART_0_IBRD_40_MHZ_115200_BAUD                                      (21)
-#define UART_0_FBRD_40_MHZ_115200_BAUD                                      (45)
+/* Defines for UartSystem */
+#define UartSystem_INST                                                    UART0
+#define UartSystem_INST_FREQUENCY                                       40000000
+#define UartSystem_INST_IRQHandler                              UART0_IRQHandler
+#define UartSystem_INST_INT_IRQN                                  UART0_INT_IRQn
+#define GPIO_UartSystem_RX_PORT                                            GPIOA
+#define GPIO_UartSystem_TX_PORT                                            GPIOA
+#define GPIO_UartSystem_RX_PIN                                    DL_GPIO_PIN_11
+#define GPIO_UartSystem_TX_PIN                                    DL_GPIO_PIN_10
+#define GPIO_UartSystem_IOMUX_RX                                 (IOMUX_PINCM22)
+#define GPIO_UartSystem_IOMUX_TX                                 (IOMUX_PINCM21)
+#define GPIO_UartSystem_IOMUX_RX_FUNC                  IOMUX_PINCM22_PF_UART0_RX
+#define GPIO_UartSystem_IOMUX_TX_FUNC                  IOMUX_PINCM21_PF_UART0_TX
+#define UartSystem_BAUD_RATE                                            (115200)
+#define UartSystem_IBRD_40_MHZ_115200_BAUD                                  (21)
+#define UartSystem_FBRD_40_MHZ_115200_BAUD                                  (45)
+/* Defines for UartData */
+#define UartData_INST                                                      UART1
+#define UartData_INST_FREQUENCY                                         40000000
+#define UartData_INST_IRQHandler                                UART1_IRQHandler
+#define UartData_INST_INT_IRQN                                    UART1_INT_IRQn
+#define GPIO_UartData_RX_PORT                                              GPIOA
+#define GPIO_UartData_TX_PORT                                              GPIOB
+#define GPIO_UartData_RX_PIN                                      DL_GPIO_PIN_18
+#define GPIO_UartData_TX_PIN                                       DL_GPIO_PIN_4
+#define GPIO_UartData_IOMUX_RX                                   (IOMUX_PINCM40)
+#define GPIO_UartData_IOMUX_TX                                   (IOMUX_PINCM17)
+#define GPIO_UartData_IOMUX_RX_FUNC                    IOMUX_PINCM40_PF_UART1_RX
+#define GPIO_UartData_IOMUX_TX_FUNC                    IOMUX_PINCM17_PF_UART1_TX
+#define UartData_BAUD_RATE                                              (115200)
+#define UartData_IBRD_40_MHZ_115200_BAUD                                    (21)
+#define UartData_FBRD_40_MHZ_115200_BAUD                                    (45)
 
 
 
@@ -189,11 +205,17 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 
 
 /* Defines for DMA_RX */
-#define DMA_RX_CHAN_ID                                                       (1)
-#define UART_0_INST_DMA_TRIGGER_0                            (DMA_UART0_RX_TRIG)
+#define DMA_RX_CHAN_ID                                                       (3)
+#define UartSystem_INST_DMA_TRIGGER_0                        (DMA_UART0_RX_TRIG)
 /* Defines for DMA_TX */
-#define DMA_TX_CHAN_ID                                                       (0)
-#define UART_0_INST_DMA_TRIGGER_1                            (DMA_UART0_TX_TRIG)
+#define DMA_TX_CHAN_ID                                                       (2)
+#define UartSystem_INST_DMA_TRIGGER_1                        (DMA_UART0_TX_TRIG)
+/* Defines for DMA_RX0 */
+#define DMA_RX0_CHAN_ID                                                      (1)
+#define UartData_INST_DMA_TRIGGER_0                          (DMA_UART1_RX_TRIG)
+/* Defines for DMA_TX0 */
+#define DMA_TX0_CHAN_ID                                                      (0)
+#define UartData_INST_DMA_TRIGGER_1                          (DMA_UART1_TX_TRIG)
 
 
 /* Port definition for Pin Group GPIO_MPU6050 */
@@ -270,7 +292,8 @@ void SYSCFG_DL_Motor_Pwm_init(void);
 void SYSCFG_DL_Servomotor_Pwm_init(void);
 void SYSCFG_DL_EncoderCapture_init(void);
 void SYSCFG_DL_I2C_OLED_init(void);
-void SYSCFG_DL_UART_0_init(void);
+void SYSCFG_DL_UartSystem_init(void);
+void SYSCFG_DL_UartData_init(void);
 void SYSCFG_DL_GraySensorAdc_init(void);
 void SYSCFG_DL_DMA_init(void);
 
