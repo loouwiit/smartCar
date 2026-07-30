@@ -22,6 +22,7 @@ extern int moveCount[2];
 extern FPID fpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
+extern Script<float> script[2];
 extern Serve serve;
 extern GraySensor graySensor;
 
@@ -215,34 +216,52 @@ void dealRecieve(char* recieve)
 		float speed = atof(rxBufferSplit[2]);
 
 		mixer[index][MixNumber::Uart] = speed;
-		fpid[index].setTarget(mixer[index]);
 
 		if (speed == 0)
 			fpid[index].clearIntegration();
 	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "move", 4))
+	else if (rxBufferSplit[0][0] == 'm' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "move", 4))
 	{
 		if (rxSplitSize < 3) return;
 		float speed = atof(rxBufferSplit[1]);
 		float rotate = atof(rxBufferSplit[2]);
-		int delay = 0;
+
+		int scriptIndex[2]{};
+
+		while (true)
+		{
+			scriptIndex[0] = script[0].getFreeScriptEntryIndex();
+			scriptIndex[1] = script[1].getFreeScriptEntryIndex();
+			if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
+				break;
+			while (uart.isTransiting())
+				vTaskDelay(1);
+			uart.transit("no free script entry!\n", 22);
+			vTaskDelay(1);
+		}
+
+		Script<float, 5U>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+
+		int delay{};
+		int duration{};
 
 		if (rxSplitSize > 3)
-			delay = atoi(rxBufferSplit[3]);
+			duration = atoi(rxBufferSplit[3]);
+
+		if (rxSplitSize > 4)
+			delay = atoi(rxBufferSplit[4]);
+
+		auto nowTime = xTaskGetTickCount();
+		for (auto& i : scriptEntry)
+		{
+			i->startTime = nowTime + delay;
+			i->expireTime = i->startTime + duration;
+		}
 
 		float speedLeft = speed - rotate;
 		float speedRight = speed + rotate;
-
-		vTaskDelay(delay);
-
-		mixer[0][MixNumber::Uart] = speedLeft;
-		fpid[0].setTarget(mixer[0]);
-
-		mixer[1][MixNumber::Uart] = speedRight;
-		fpid[1].setTarget(mixer[1]);
-
-		for (int i = 0; i < 2;i++)
-			fpid[i].clearIntegration();
+		scriptEntry[0]->strength = speedLeft;
+		scriptEntry[1]->strength = speedRight;
 	}
 	else if (prefixCompare(rxBufferSplit[0], strlen(rxBufferSplit[0]), "close", 5))
 	{
