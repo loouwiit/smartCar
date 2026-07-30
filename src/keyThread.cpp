@@ -21,10 +21,10 @@ extern bool calibrating;
 
 extern int moveCount[2];
 static int targetCount{};
-constexpr int roundCount = 10450;
+constexpr int roundCount = 10370;
 constexpr TickType_t StartTimeCoolDown = pdMS_TO_TICKS(2000);
 
-constexpr static float KeySpeed = 2.0f;
+constexpr static float KeySpeed = 2.5f;
 constexpr static TickType_t longPressTime = pdMS_TO_TICKS(2000);
 static TickType_t keyPressTime = 0;
 

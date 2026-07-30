@@ -16,7 +16,7 @@ static char txBuffer[64]{};
 static int txSize = 0;
 extern FPID fpid[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
-float grayMoveSpeed = 0.1f;
+float grayMoveSpeed = 0.125f;
 
 bool grayEnable = false;
 
@@ -30,14 +30,14 @@ void graySensorThread(void*)
 	float graySpeed = 0;
 	float lastGray = 0;
 
-	graySensor.setThreshold(0, 1920);
-	graySensor.setThreshold(1, 1920);
-	graySensor.setThreshold(2, 2395);
-	graySensor.setThreshold(3, 2125);
-	graySensor.setThreshold(4, 1581);
-	graySensor.setThreshold(5, 2245);
-	graySensor.setThreshold(6, 1912);
-	graySensor.setThreshold(7, 1754);
+	graySensor.setThreshold(0, 1395);
+	graySensor.setThreshold(1, 1960);
+	graySensor.setThreshold(2, 2396);
+	graySensor.setThreshold(3, 1773);
+	graySensor.setThreshold(4, 1407);
+	graySensor.setThreshold(5, 2190);
+	graySensor.setThreshold(6, 2199);
+	graySensor.setThreshold(7, 1382);
 
 	while (true)
 	{
