@@ -76,9 +76,6 @@ void keyThread(void*)
 			vTaskDelay(1);
 		}
 
-		while (uart.isTransiting())
-			vTaskDelay(1);
-
 		Script<float, 5U>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
 
 		for (auto& i : scriptEntry)
