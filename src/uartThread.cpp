@@ -117,7 +117,7 @@ void dealRecieve(char* recieve)
 	if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
-		int target = serve;
+		int target = serve[Serve::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
@@ -126,9 +126,6 @@ void dealRecieve(char* recieve)
 		if (target >= 2500)
 			target = 2500 - 1;
 		serve[Serve::MixNumber::Uart] = target;
-
-		vTaskDelay(pdMS_TO_TICKS(200));
-		serve[Serve::MixNumber::Uart] = Serve::StandardBalancePoint;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -148,12 +145,9 @@ void dealRecieve(char* recieve)
 			target = 500;
 		serve[Serve::MixNumber::Uart] = target;
 
-		vTaskDelay(pdMS_TO_TICKS(200));
-		serve[Serve::MixNumber::Uart] = Serve::StandardBalancePoint;
-
 		while (uart.isTransiting())
 			vTaskDelay(1);
-		txSize = sprintf(txBuffer, "added %d to %d\n", delta, target);
+		txSize = sprintf(txBuffer, "subed %d to %d\n", delta, target);
 		uart.transit(txBuffer, txSize);
 		while (uart.isTransiting())
 			vTaskDelay(1);
