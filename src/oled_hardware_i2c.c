@@ -3,6 +3,7 @@
 #include "clock.h"
 
 #include "FreeRTOS.h"
+#include <task.h>
 
 #define I2C_TIMEOUT_MS  (10)
 

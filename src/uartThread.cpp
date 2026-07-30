@@ -26,8 +26,6 @@ extern Script<float> script[2];
 extern Serve serve;
 extern GraySensor graySensor;
 
-extern int turnContorl;
-extern int leftTurnCount;
 extern int RoundCount;
 
 extern float pitch, roll, yaw;

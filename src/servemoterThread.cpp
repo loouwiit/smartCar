@@ -10,9 +10,6 @@
 #include "autoDeleteThread.hpp"
 #include "serve.hpp"
 
-static char txBuffer[64]{};
-static int txSize{};
-
 extern UART uart;
 
 Serve serve{ { Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX } };

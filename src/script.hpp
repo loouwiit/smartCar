@@ -22,9 +22,9 @@ public:
 		for (auto& i : script) i = {};
 	}
 
-	auto getFreeScriptEntryIndex()
+	int getFreeScriptEntryIndex()
 	{
-		for (int i = 0; i < Size; ++i) if (script[i].startTime == portMAX_DELAY) return i;
+		for (unsigned i = 0; i < Size; ++i) if (script[i].startTime == portMAX_DELAY) return i;
 		return -1;
 	}
 

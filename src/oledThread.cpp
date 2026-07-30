@@ -9,7 +9,6 @@
 #include "oled_hardware_i2c.h"
 
 static char buffer[128]{};
-static int bufferSize{};
 
 extern UART uart;
 extern int moveCount[2];
