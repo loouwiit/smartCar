@@ -40,7 +40,6 @@ public:
 		Uart,
 		GraySensor,
 		Key,
-		Turn,
 
 		Count,
 	};

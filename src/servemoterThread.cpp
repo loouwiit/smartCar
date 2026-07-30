@@ -7,10 +7,11 @@
 #include "uart.hpp"
 #include "autoDeleteThread.hpp"
 #include "pwm.hpp"
+#include "mixer.hpp"
 
 extern UART uart;
 
-PWM serve{ Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX };
+PWM servePwm{ Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX };  // 500 - 2500
 
 void servemoterThread(void*)
 {
@@ -21,29 +22,4 @@ void servemoterThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("servemoterThread started\n", 25);
-
-	auto target = 0;
-	auto direction = +20;
-	while (true)
-	{
-		target += direction;
-		if (target >= 2500)
-		{
-			target = 2500 - 1;
-			direction = -20;
-		}
-		if (target < 500)
-		{
-			target = 500;
-			direction = +20;
-		}
-
-		serve = target;
-		vTaskDelay(pdMS_TO_TICKS(100));
-
-		auto txSize = sprintf(txBuffer, "target: %d\n", target);
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		uart.transit(txBuffer, txSize);
-	}
 }

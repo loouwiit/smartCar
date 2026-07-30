@@ -21,6 +21,7 @@ extern int moveCount[2];
 extern FPID fpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
+extern PWM servePwm;
 extern GraySensor graySensor;
 
 extern int turnContorl;
@@ -94,6 +95,7 @@ void uartThread(void*)
 		if (uart.isTransiting())
 			vTaskDelay(1);
 
+		txSize = 0;
 		// txSize = sprintf(txBuffer, "%.1f %.1f %.1f %.1f\t\t%.1f %.1f %.1f %.1f %d\n", mixer[0][0], mixer[0][1], mixer[0][2], mixer[0][3], mixer[1][0], mixer[1][1], mixer[1][2], mixer[1][3], turnContorl);
 		// txSize = sprintf(txBuffer, "%d %d %d %d %d %d %d %d\n", (bool)graySensor[0], (bool)graySensor[1], (bool)graySensor[2], (bool)graySensor[3], (bool)graySensor[4], (bool)graySensor[5], (bool)graySensor[6], (bool)graySensor[7]);
 		// txSize = sprintf(txBuffer, "%.7f\n", (float)(moveCount[0] - moveCount[1]) / RoundCount);
@@ -111,7 +113,71 @@ void dealRecieve(char* recieve)
 {
 	rxSplitSize = splitCommand(recieve, rxBufferSplit);
 
-	if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
+	if (rxBufferSplit[0][0] == '+')
+	{
+		int delta = 10;
+		int target = servePwm;
+		if (rxSplitSize > 1)
+			delta = atoi(rxBufferSplit[1]);
+		else delta = atoi(rxBufferSplit[0] + 1);
+		if (delta == 0) delta = 100;
+		target += delta;
+		if (target >= 2500)
+			target = 2500 - 1;
+		servePwm = target;
+
+		vTaskDelay(pdMS_TO_TICKS(200));
+		servePwm = 2335;
+
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		txSize = sprintf(txBuffer, "added %d to %d\n", delta, target);
+		uart.transit(txBuffer, txSize);
+	}
+	else if (rxBufferSplit[0][0] == '-')
+	{
+		int delta = 10;
+		int target = servePwm;
+		if (rxSplitSize > 1)
+			delta = atoi(rxBufferSplit[1]);
+		else delta = atoi(rxBufferSplit[0] + 1);
+		if (delta == 0) delta = 100;
+		target -= delta;
+		if (target < 500)
+			target = 500;
+		servePwm = target;
+
+		vTaskDelay(pdMS_TO_TICKS(200));
+		servePwm = 2335;
+
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		txSize = sprintf(txBuffer, "added %d to %d\n", delta, target);
+		uart.transit(txBuffer, txSize);
+		while (uart.isTransiting())
+			vTaskDelay(1);
+	}
+	else if (rxBufferSplit[0][0] == '=')
+	{
+		int target{};
+		if (rxSplitSize > 1)
+			target = atoi(rxBufferSplit[1]);
+		else target = atoi(rxBufferSplit[0] + 1);
+		if (target == 0)
+			target = 2335;
+
+		if (target < 500)
+			target = 500;
+		if (target >= 2500)
+			target = 2500 - 1;
+		servePwm = target;
+
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		txSize = sprintf(txBuffer, "set to %d\n", target);
+		uart.transit(txBuffer, txSize);
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
 	{
 		if (rxSplitSize < 4) return;
 
