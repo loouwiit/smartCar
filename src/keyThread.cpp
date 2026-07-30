@@ -14,7 +14,7 @@
 #include "mixer.hpp"
 
 extern UART uart;
-extern Mixer<float, MixNumber::Count> mixer[2];
+extern Mixer<float, MotorMixNumber::Count> motorMixer[2];
 
 extern bool grayEnable;
 
@@ -71,11 +71,11 @@ void start()
 
 	grayEnable = true;
 
-	mixer[0][MixNumber::Key] = +KeySpeed;
-	mixer[1][MixNumber::Key] = +KeySpeed;
+	motorMixer[0][MotorMixNumber::Key] = +KeySpeed;
+	motorMixer[1][MotorMixNumber::Key] = +KeySpeed;
 
-	mixer[0].enable(MixNumber::GraySensor);
-	mixer[1].enable(MixNumber::GraySensor);
+	motorMixer[0].enable(MotorMixNumber::GraySensor);
+	motorMixer[1].enable(MotorMixNumber::GraySensor);
 }
 
 void stop()
@@ -85,9 +85,9 @@ void stop()
 
 	grayEnable = false;
 
-	mixer[0][MixNumber::Key] = 0.0f;
-	mixer[1][MixNumber::Key] = 0.0f;
+	motorMixer[0][MotorMixNumber::Key] = 0.0f;
+	motorMixer[1][MotorMixNumber::Key] = 0.0f;
 
-	mixer[0].disable(MixNumber::GraySensor);
-	mixer[1].disable(MixNumber::GraySensor);
+	motorMixer[0].disable(MotorMixNumber::GraySensor);
+	motorMixer[1].disable(MotorMixNumber::GraySensor);
 }

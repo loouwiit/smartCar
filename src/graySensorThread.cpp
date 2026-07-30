@@ -15,7 +15,7 @@ GraySensor graySensor = { {GraySensor_GraySensorA_PORT, GraySensor_GraySensorA_P
 char txBuffer[64]{};
 int txSize = 0;
 extern FPID fpid[2];
-extern Mixer<float, MixNumber::Count> mixer[2];
+extern Mixer<float, MotorMixNumber::Count> motorMixer[2];
 float grayMoveSpeed = 0.1f;
 
 bool grayEnable = false;
@@ -87,11 +87,11 @@ void graySensorThread(void*)
 		{
 			lastGray = graySpeed;
 
-			mixer[0][MixNumber::GraySensor] = +graySpeed;
-			mixer[1][MixNumber::GraySensor] = -graySpeed;
+			motorMixer[0][MotorMixNumber::GraySensor] = +graySpeed;
+			motorMixer[1][MotorMixNumber::GraySensor] = -graySpeed;
 
-			mixer[0].mix();
-			mixer[1].mix();
+			motorMixer[0].mix();
+			motorMixer[1].mix();
 		}
 
 		vTaskDelay(5);

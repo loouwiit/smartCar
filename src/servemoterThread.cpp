@@ -11,6 +11,7 @@
 
 extern UART uart;
 
+Mixer<float, ServemoterMixNumber::Count> serveMixer{};
 PWM servePwm{ Servomotor_Pwm_INST, GPIO_Servomotor_Pwm_C1_IDX };  // 500 - 2500
 
 void servemoterThread(void*)
@@ -22,4 +23,16 @@ void servemoterThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("servemoterThread started\n", 25);
+
+	serveMixer[ServemoterMixNumber::Standard] = 2335;
+	serveMixer.setMixCallback([]()
+		{
+			servePwm = (unsigned short)(float)serveMixer;
+		});
+
+	while (true)
+	{
+		serveMixer.mix();
+		vTaskDelay(10);
+	}
 }

@@ -22,7 +22,7 @@ Motor motor[2]{
 	{{{Motor_A2_PORT, Motor_A2_PIN}, {Motor_A1_PORT, Motor_A1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_0_INDEX}},
 	{{{Motor_B2_PORT, Motor_B2_PIN}, {Motor_B1_PORT, Motor_B1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_1_INDEX}} };
 FPID fpid[2]{};
-Mixer<float, MixNumber::Count> mixer[2];
+Mixer<float, MotorMixNumber::Count> motorMixer[2];
 
 float predict(float target, void*)
 {
@@ -35,11 +35,11 @@ void motorThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
 
-	mixer[0].setMixCallback([]() { fpid[0].setTarget(mixer[0]); });
-	mixer[1].setMixCallback([]() {fpid[1].setTarget(mixer[1]); });
+	motorMixer[0].setMixCallback([]() { fpid[0].setTarget(motorMixer[0]); });
+	motorMixer[1].setMixCallback([]() {fpid[1].setTarget(motorMixer[1]); });
 
-	mixer[0].mix();
-	mixer[1].mix();
+	motorMixer[0].mix();
+	motorMixer[1].mix();
 
 	for (int i = 0; i < 2; i++)
 	{

@@ -20,8 +20,8 @@ extern float captureSpeeds[2];
 extern int moveCount[2];
 extern FPID fpid[2];
 extern Motor motor[2];
-extern Mixer<float, MixNumber::Count> mixer[2];
-extern PWM servePwm;
+extern Mixer<float, MotorMixNumber::Count> motorMixer[2];
+extern Mixer<float, ServemoterMixNumber::Count> serveMixer;
 extern GraySensor graySensor;
 
 extern int turnContorl;
@@ -96,7 +96,7 @@ void uartThread(void*)
 			vTaskDelay(1);
 
 		txSize = 0;
-		// txSize = sprintf(txBuffer, "%.1f %.1f %.1f %.1f\t\t%.1f %.1f %.1f %.1f %d\n", mixer[0][0], mixer[0][1], mixer[0][2], mixer[0][3], mixer[1][0], mixer[1][1], mixer[1][2], mixer[1][3], turnContorl);
+		// txSize = sprintf(txBuffer, "%.1f %.1f %.1f %.1f\t\t%.1f %.1f %.1f %.1f %d\n", motorMixer[0][0], motorMixer[0][1], motorMixer[0][2], motorMixer[0][3], motorMixer[1][0], motorMixer[1][1], motorMixer[1][2], motorMixer[1][3], turnContorl);
 		// txSize = sprintf(txBuffer, "%d %d %d %d %d %d %d %d\n", (bool)graySensor[0], (bool)graySensor[1], (bool)graySensor[2], (bool)graySensor[3], (bool)graySensor[4], (bool)graySensor[5], (bool)graySensor[6], (bool)graySensor[7]);
 		// txSize = sprintf(txBuffer, "%.7f\n", (float)(moveCount[0] - moveCount[1]) / RoundCount);
 		// txSize = sprintf(txBuffer, "speed %.2f %.2f %.2f %.2f\n",captureSpeeds[0], captureSpeeds[1], fpid[0].getOut(), fpid[1].getOut());
@@ -116,7 +116,7 @@ void dealRecieve(char* recieve)
 	if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
-		int target = servePwm;
+		int target = serveMixer[ServemoterMixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
@@ -124,10 +124,10 @@ void dealRecieve(char* recieve)
 		target += delta;
 		if (target >= 2500)
 			target = 2500 - 1;
-		servePwm = target;
+		serveMixer[ServemoterMixNumber::Uart] = target;
 
 		vTaskDelay(pdMS_TO_TICKS(200));
-		servePwm = 2335;
+		serveMixer[ServemoterMixNumber::Uart] = 2335;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -137,7 +137,7 @@ void dealRecieve(char* recieve)
 	else if (rxBufferSplit[0][0] == '-')
 	{
 		int delta = 10;
-		int target = servePwm;
+		int target = serveMixer[ServemoterMixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
@@ -145,10 +145,10 @@ void dealRecieve(char* recieve)
 		target -= delta;
 		if (target < 500)
 			target = 500;
-		servePwm = target;
+		serveMixer[ServemoterMixNumber::Uart] = target;
 
 		vTaskDelay(pdMS_TO_TICKS(200));
-		servePwm = 2335;
+		serveMixer[ServemoterMixNumber::Uart] = 2335;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -170,7 +170,7 @@ void dealRecieve(char* recieve)
 			target = 500;
 		if (target >= 2500)
 			target = 2500 - 1;
-		servePwm = target;
+		serveMixer[ServemoterMixNumber::Uart] = target;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
@@ -205,9 +205,9 @@ void dealRecieve(char* recieve)
 
 		float speed = atof(rxBufferSplit[2]);
 
-		mixer[index][MixNumber::Uart] = speed;
-		mixer[index].mix();
-		fpid[index].setTarget(mixer[index]);
+		motorMixer[index][MotorMixNumber::Uart] = speed;
+		motorMixer[index].mix();
+		fpid[index].setTarget(motorMixer[index]);
 
 		if (speed == 0)
 			fpid[index].clearIntegration();
@@ -221,13 +221,13 @@ void dealRecieve(char* recieve)
 		float speedLeft = speed - rotate;
 		float speedRight = speed + rotate;
 
-		mixer[0][MixNumber::Uart] = speedLeft;
-		mixer[0].mix();
-		fpid[0].setTarget(mixer[0]);
+		motorMixer[0][MotorMixNumber::Uart] = speedLeft;
+		motorMixer[0].mix();
+		fpid[0].setTarget(motorMixer[0]);
 
-		mixer[1][MixNumber::Uart] = speedRight;
-		mixer[1].mix();
-		fpid[1].setTarget(mixer[1]);
+		motorMixer[1][MotorMixNumber::Uart] = speedRight;
+		motorMixer[1].mix();
+		fpid[1].setTarget(motorMixer[1]);
 
 		for (int i = 0; i < 2;i++)
 			fpid[i].clearIntegration();

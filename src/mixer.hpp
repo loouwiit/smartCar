@@ -33,13 +33,29 @@ private:
 	T out;
 };
 
-class MixNumber
+class MotorMixNumber
 {
 public:
-	enum : unsigned char {
+	enum : unsigned char
+	{
 		Uart,
 		GraySensor,
 		Key,
+
+		Count,
+	};
+};
+
+class ServemoterMixNumber
+{
+public:
+	enum : unsigned char
+	{
+		Uart,
+		Standard = Uart,
+		Balence,
+		StartStop,
+		Movememt,
 
 		Count,
 	};
