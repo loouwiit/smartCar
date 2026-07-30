@@ -9,8 +9,8 @@
 #include "gpio.hpp"
 #include "clock.h"
 
-constexpr size_t rxBufferSize = 64;
-constexpr size_t rxBufferCount = 5;
+constexpr size_t rxBufferSize = 256;
+constexpr size_t rxBufferCount = 4;
 
 UART uart{};
 

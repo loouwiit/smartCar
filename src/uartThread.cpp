@@ -34,9 +34,9 @@ constexpr int txBufferSize = 64;
 static char txBuffer[txBufferSize] = "";
 static int txSize = 0;
 
-constexpr int rxBufferSize = 64;
+constexpr int rxBufferSize = 256;
 static char rxBuffer[rxBufferSize]{};
-static char* rxBufferSplit[10]{};
+static char* rxBufferSplit[64]{};
 static unsigned char rxSplitSize = 0;
 static int rxSize = 0;
 static int rxTotolSize = 0;
@@ -67,9 +67,9 @@ void uartThread(void*)
 					rxBuffer[rxTotolSize] == '\r')
 				{
 					// echo
-					while (uart.isTransiting())
-						vTaskDelay(1);
-					uart.transit(rxBuffer, rxTotolSize + 1);
+					// while (uart.isTransiting())
+					// 	vTaskDelay(1);
+					// uart.transit(rxBuffer, rxTotolSize + 1);
 
 					// deal
 					rxBuffer[rxTotolSize] = '\0';
