@@ -173,7 +173,7 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize > 3)
 			offset = atoi(rxBufferSplit[3]);
 
-		int freeEntryIndex = serve.getFreeScriptEntryIndex();
+		int freeEntryIndex = serve.script.getFreeScriptEntryIndex();
 		if (freeEntryIndex == -1)
 		{
 			while (uart.isTransiting())

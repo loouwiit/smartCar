@@ -29,7 +29,6 @@ void servemoterThread(void*)
 
 	while (true)
 	{
-		serve[Serve::MixNumber::Script] = serve.getScriptTotol(xTaskGetTickCount());
 		serve.mix();
 		vTaskDelay(10);
 	}
