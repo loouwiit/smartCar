@@ -123,8 +123,6 @@ void dealRecieve(char* recieve)
 		else delta = atoi(rxBufferSplit[0] + 1);
 		if (delta == 0) delta = 100;
 		target += delta;
-		if (target >= 2500)
-			target = 2500 - 1;
 		serve[Serve::MixNumber::Uart] = target;
 
 		while (uart.isTransiting())
@@ -141,8 +139,6 @@ void dealRecieve(char* recieve)
 		else delta = atoi(rxBufferSplit[0] + 1);
 		if (delta == 0) delta = 100;
 		target -= delta;
-		if (target < 500)
-			target = 500;
 		serve[Serve::MixNumber::Uart] = target;
 
 		while (uart.isTransiting())
@@ -161,10 +157,6 @@ void dealRecieve(char* recieve)
 		if (target == 0)
 			target = Serve::StandardBalancePoint;
 
-		if (target < 500)
-			target = 500;
-		if (target >= 2500)
-			target = 2500 - 1;
 		serve[Serve::MixNumber::Uart] = target;
 
 		while (uart.isTransiting())
