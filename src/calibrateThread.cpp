@@ -9,10 +9,14 @@
 #include "graySensor.hpp"
 #include "autoDeleteThread.hpp"
 
+#include "oled_hardware_i2c.h"
+
 #include "cstdio"
 
 extern UART uart;
 extern GraySensor graySensor;
+
+bool calibrating{};
 
 static GPIO key{ KEY_PORT, KEY_KEY_1_PIN };
 static GPIO led{ LED_PORT,LED_G_PIN };
@@ -78,6 +82,10 @@ void calibrateThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 
-	void keyThread(void*);
-	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
+	sprintf(txBuffer, "%d %d %d %d", threshold[0], threshold[1], threshold[2], threshold[3]);
+	OLED_ShowString(0, 2, txBuffer, 8);
+	sprintf(txBuffer, "%d %d %d %d", threshold[4], threshold[5], threshold[6], threshold[7]);
+	OLED_ShowString(0, 3, txBuffer, 8);
+
+	calibrating = false;
 }

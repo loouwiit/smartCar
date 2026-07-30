@@ -223,7 +223,7 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint32_t num, uint8_t len, uint8_t sizey
 }
 
 //显示一个字符号串
-void OLED_ShowString(uint8_t x, uint8_t y, uint8_t* chr, uint8_t sizey)
+void OLED_ShowString(uint8_t x, uint8_t y, const char* chr, uint8_t sizey)
 {
     uint8_t j = 0;
     while (chr[j] != '\0')

@@ -30,14 +30,14 @@ void graySensorThread(void*)
 	float graySpeed = 0;
 	float lastGray = 0;
 
-	graySensor.setThreshold(0, 583.05);
-	graySensor.setThreshold(1, 1078.225);
-	graySensor.setThreshold(2, 1505.9);
-	graySensor.setThreshold(3, 1210.525);
-	graySensor.setThreshold(4, 1010.325);
-	graySensor.setThreshold(5, 1587.225);
-	graySensor.setThreshold(6, 1331.925);
-	graySensor.setThreshold(7, 716.45);
+	graySensor.setThreshold(0, 1920);
+	graySensor.setThreshold(1, 1920);
+	graySensor.setThreshold(2, 2395);
+	graySensor.setThreshold(3, 2125);
+	graySensor.setThreshold(4, 1581);
+	graySensor.setThreshold(5, 2245);
+	graySensor.setThreshold(6, 1912);
+	graySensor.setThreshold(7, 1754);
 
 	while (true)
 	{

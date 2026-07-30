@@ -51,10 +51,10 @@ void mainThread(void*)
 
 	GpioInterrupt::init();
 
-	// xTaskCreate(captureThread, "capture", 0x100, nullptr, 2, nullptr);
-	// xTaskCreate(motorThread, "motor", 0x100, nullptr, 2, nullptr);
+	xTaskCreate(captureThread, "capture", 0x100, nullptr, 2, nullptr);
+	xTaskCreate(motorThread, "motor", 0x100, nullptr, 2, nullptr);
 	xTaskCreate(uartThread, "uart", 0x200, nullptr, 2, nullptr);
-	// xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
+	xTaskCreate(graySensorThread, "graySensor", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(keyThread, "key", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(servemoterThread, "servemoter", 0x100, nullptr, 1, nullptr);
 	xTaskCreate(oledThread, "oled", 0x200, nullptr, 1, nullptr);

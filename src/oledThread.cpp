@@ -8,22 +8,29 @@
 #include "autoDeleteThread.hpp"
 #include "oled_hardware_i2c.h"
 
+static char buffer[128]{};
+static int bufferSize{};
+
 extern UART uart;
+extern int moveCount[2];
 
 void oledThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
-	char txBuffer[128]{};
-	int txSize{};
 
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("oledThread started\n", 19);
 
 	OLED_Init();
-	OLED_ShowString(0, 7, (uint8_t*)"test", 8);
+	while (true)
+	{
+		sprintf(buffer, "move count: %d %d", moveCount[0], moveCount[1]);
+		OLED_ShowString(0, 0, buffer, 8);
 
-	while (uart.isTransiting())
-		vTaskDelay(1);
-	uart.transit("test showed\n", 12);
+		sprintf(buffer, "tick: %ld", xTaskGetTickCount() / 1000);
+		OLED_ShowString(0, 1, buffer, 8);
+
+		vTaskDelay(pdMS_TO_TICKS(100));
+	}
 }
