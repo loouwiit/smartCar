@@ -7,9 +7,14 @@
 #include "uart.hpp"
 #include "autoDeleteThread.hpp"
 #include "serve.hpp"
+#include "fpid.hpp"
+#include <cstring>
 
 extern UART uart;
 extern UART uartData;
+
+extern Serve serve;
+FPID serveFpid{};
 
 constexpr int txBufferSize = 64;
 static char txBuffer[txBufferSize] = "";
@@ -29,6 +34,14 @@ void balanceThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("balanceThread started\n", 22);
+
+	serveFpid.outputRange[0] = -150;
+	serveFpid.outputRange[1] = +150;
+
+	serveFpid.kp = 3;
+	serveFpid.kd = 50;
+
+	serveFpid.setTarget(70);
 
 	while (true)
 	{
@@ -72,10 +85,12 @@ void balanceThread(void*)
 
 static void dealRecieve(char* recieve)
 {
-	auto data = atof(recieve);
+	float position = atof(recieve);
 
-	txSize = sprintf(txBuffer, "data:%f\n", data);
-	while (uart.isTransiting())
-		vTaskDelay(1);
+	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, serveFpid.portionP, serveFpid.portionI, serveFpid.portionD);
 	uart.transit(txBuffer, txSize);
+
+	serveFpid.update(position);
+	if (abs(position - serveFpid.getTarget()) >= 5)
+		serve[Serve::MixNumber::BalanceFeed] = serveFpid.getOut();
 }

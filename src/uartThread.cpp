@@ -20,6 +20,7 @@ extern UART uart;
 extern float captureSpeeds[2];
 extern int moveCount[2];
 extern FPID fpid[2];
+extern FPID serveFpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<float, 10> script[2];
@@ -218,13 +219,13 @@ void dealRecieve(char* recieve)
 
 		for (int i = 0; i < 2; i++)
 		{
-			fpid[i].kp = kp;
-			fpid[i].ki = ki;
-			fpid[i].kd = kd;
+			serveFpid[i].kp = kp;
+			serveFpid[i].ki = ki;
+			serveFpid[i].kd = kd;
 
-			fpid[i].integrationRange[0] = fpid[i].pidOutputRange[0] / fpid[i].ki;
-			fpid[i].integrationRange[1] = fpid[i].pidOutputRange[1] / fpid[i].ki;
-			fpid[i].clearIntegration();
+			serveFpid[i].integrationRange[0] = serveFpid[i].pidOutputRange[0] / serveFpid[i].ki;
+			serveFpid[i].integrationRange[1] = serveFpid[i].pidOutputRange[1] / serveFpid[i].ki;
+			serveFpid[i].clearIntegration();
 		}
 	}
 	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "target", 6))
