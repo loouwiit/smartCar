@@ -93,7 +93,11 @@ static void balanceRecieve(char* recieve)
 		dealRecieve(recieve + 1);
 		return;
 	}
-	if (recieve[0] < '0' || '9' < recieve[0]) return;
+	if (recieve[0] < '0' || '9' < recieve[0])
+	{
+		uart.transit("?\n", 2);
+		return;
+	};
 
 	float position = atof(recieve);
 
