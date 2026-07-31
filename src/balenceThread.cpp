@@ -60,6 +60,7 @@ void balanceThread(void*)
 					rxBuffer[rxTotolSize] == '\r')
 				{
 					// echo
+					// rxBuffer[rxTotolSize] = '\n';
 					// while (uart.isTransiting())
 					// 	vTaskDelay(1);
 					// uart.transit(rxBuffer, rxTotolSize + 1);
@@ -89,13 +90,10 @@ static void balanceRecieve(char* recieve)
 {
 	if (recieve[0] == '!')
 	{
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		uart.transit("forward\n", 8);
-
 		dealRecieve(recieve + 1);
 		return;
 	}
+	if (recieve[0] < '0' || '9' < recieve[0]) return;
 
 	float position = atof(recieve);
 

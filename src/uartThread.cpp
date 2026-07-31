@@ -128,57 +128,7 @@ void dealRecieve(char* recieve)
 
 	rxSplitSize = splitCommand(recieve, rxBufferSplit);
 
-	if (rxBufferSplit[0][0] == '+')
-	{
-		int delta = 10;
-		int target = serve[Serve::MixNumber::Uart];
-		if (rxSplitSize > 1)
-			delta = atoi(rxBufferSplit[1]);
-		else delta = atoi(rxBufferSplit[0] + 1);
-		if (delta == 0) delta = 100;
-		target += delta;
-		serve[Serve::MixNumber::Uart] = target;
-
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		txSize = sprintf(txBuffer, "added %d to %d\n", delta, target);
-		uart.transit(txBuffer, txSize);
-	}
-	else if (rxBufferSplit[0][0] == '-')
-	{
-		int delta = 10;
-		int target = serve[Serve::MixNumber::Uart];
-		if (rxSplitSize > 1)
-			delta = atoi(rxBufferSplit[1]);
-		else delta = atoi(rxBufferSplit[0] + 1);
-		if (delta == 0) delta = 100;
-		target -= delta;
-		serve[Serve::MixNumber::Uart] = target;
-
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		txSize = sprintf(txBuffer, "subed %d to %d\n", delta, target);
-		uart.transit(txBuffer, txSize);
-		while (uart.isTransiting())
-			vTaskDelay(1);
-	}
-	else if (rxBufferSplit[0][0] == '=')
-	{
-		int target{};
-		if (rxSplitSize > 1)
-			target = atoi(rxBufferSplit[1]);
-		else target = atoi(rxBufferSplit[0] + 1);
-		if (target == 0)
-			target = Serve::StandardBalancePoint;
-
-		serve[Serve::MixNumber::Uart] = target;
-
-		while (uart.isTransiting())
-			vTaskDelay(1);
-		txSize = sprintf(txBuffer, "set to %d\n", target);
-		uart.transit(txBuffer, txSize);
-	}
-	else if (rxBufferSplit[0][0] == 's' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "script", 6))
+	if (rxBufferSplit[0][0] == 's' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "script", 6))
 	{
 		if (rxSplitSize <= 2) return;
 		int strength = atoi(rxBufferSplit[1]);
@@ -199,57 +149,6 @@ void dealRecieve(char* recieve)
 		freeEntry.startTime = xTaskGetTickCount() + offset;
 		freeEntry.expireTime = freeEntry.startTime + pdMS_TO_TICKS(duration);
 		freeEntry.strength = strength;
-	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "track", 5))
-	{
-		if (rxSplitSize <= 1) return;
-		if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'n')
-		{
-			grayEnable = true;
-
-			mixer[0].enable(MixNumber::GraySensor);
-			mixer[1].enable(MixNumber::GraySensor);
-		}
-		else if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'f' && rxBufferSplit[1][2] == 'f')
-		{
-			grayEnable = false;
-
-			mixer[0].disable(MixNumber::GraySensor);
-			mixer[1].disable(MixNumber::GraySensor);
-		}
-	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
-	{
-		if (rxSplitSize < 4) return;
-
-		float kp = atof(rxBufferSplit[1]);
-		float ki = atof(rxBufferSplit[2]);
-		float kd = atof(rxBufferSplit[3]);
-
-		for (int i = 0; i < 2; i++)
-		{
-			serveFpid[i].kp = kp;
-			serveFpid[i].ki = ki;
-			serveFpid[i].kd = kd;
-
-			serveFpid[i].integrationRange[0] = serveFpid[i].pidOutputRange[0] / serveFpid[i].ki;
-			serveFpid[i].integrationRange[1] = serveFpid[i].pidOutputRange[1] / serveFpid[i].ki;
-			serveFpid[i].clearIntegration();
-		}
-	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "target", 6))
-	{
-		if (rxSplitSize < 3) return;
-
-		int index = atoi(rxBufferSplit[1]);
-		if (index >= 2) return;
-
-		float speed = atof(rxBufferSplit[2]);
-
-		mixer[index][MixNumber::Uart] = speed;
-
-		if (speed == 0)
-			fpid[index].clearIntegration();
 	}
 	else if (rxBufferSplit[0][0] == 'm' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "move", 4))
 	{
@@ -293,6 +192,89 @@ void dealRecieve(char* recieve)
 		float speedRight = speed + rotate;
 		scriptEntry[0]->strength = speedLeft;
 		scriptEntry[1]->strength = speedRight;
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "track", 5))
+	{
+		if (rxSplitSize <= 1) return;
+		if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'n')
+		{
+			grayEnable = true;
+
+			mixer[0].enable(MixNumber::GraySensor);
+			mixer[1].enable(MixNumber::GraySensor);
+		}
+		else if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'f' && rxBufferSplit[1][2] == 'f')
+		{
+			grayEnable = false;
+
+			mixer[0].disable(MixNumber::GraySensor);
+			mixer[1].disable(MixNumber::GraySensor);
+		}
+	}
+	else if (rxBufferSplit[0][0] == '+')
+	{
+		int delta = 10;
+		int target = serve[Serve::MixNumber::Uart];
+		if (rxSplitSize > 1)
+			delta = atoi(rxBufferSplit[1]);
+		else delta = atoi(rxBufferSplit[0] + 1);
+		if (delta == 0) delta = 100;
+		target += delta;
+		serve[Serve::MixNumber::Uart] = target;
+	}
+	else if (rxBufferSplit[0][0] == '-')
+	{
+		int delta = 10;
+		int target = serve[Serve::MixNumber::Uart];
+		if (rxSplitSize > 1)
+			delta = atoi(rxBufferSplit[1]);
+		else delta = atoi(rxBufferSplit[0] + 1);
+		if (delta == 0) delta = 100;
+		target -= delta;
+		serve[Serve::MixNumber::Uart] = target;
+	}
+	else if (rxBufferSplit[0][0] == '=')
+	{
+		int target{};
+		if (rxSplitSize > 1)
+			target = atoi(rxBufferSplit[1]);
+		else target = atoi(rxBufferSplit[0] + 1);
+		if (target == 0)
+			target = Serve::StandardBalancePoint;
+		serve[Serve::MixNumber::Uart] = target;
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
+	{
+		if (rxSplitSize < 4) return;
+
+		float kp = atof(rxBufferSplit[1]);
+		float ki = atof(rxBufferSplit[2]);
+		float kd = atof(rxBufferSplit[3]);
+
+		for (int i = 0; i < 2; i++)
+		{
+			serveFpid[i].kp = kp;
+			serveFpid[i].ki = ki;
+			serveFpid[i].kd = kd;
+
+			serveFpid[i].integrationRange[0] = serveFpid[i].pidOutputRange[0] / serveFpid[i].ki;
+			serveFpid[i].integrationRange[1] = serveFpid[i].pidOutputRange[1] / serveFpid[i].ki;
+			serveFpid[i].clearIntegration();
+		}
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "target", 6))
+	{
+		if (rxSplitSize < 3) return;
+
+		int index = atoi(rxBufferSplit[1]);
+		if (index >= 2) return;
+
+		float speed = atof(rxBufferSplit[2]);
+
+		mixer[index][MixNumber::Uart] = speed;
+
+		if (speed == 0)
+			fpid[index].clearIntegration();
 	}
 	else if (prefixCompare(rxBufferSplit[0], strlen(rxBufferSplit[0]), "close", 5))
 	{

@@ -12,8 +12,8 @@
 constexpr size_t SystemRxBufferSize = 256;
 constexpr size_t SystemRxBufferCount = 4;
 
-constexpr size_t UserRxBufferSize = 32;
-constexpr size_t UserRxBufferCount = 4;
+constexpr size_t UserRxBufferSize = 256;
+constexpr size_t UserRxBufferCount = 16;
 
 UART uart{};
 UART uartData{};

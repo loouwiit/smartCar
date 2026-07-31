@@ -182,9 +182,9 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_UartData_IOMUX_TX                                   (IOMUX_PINCM36)
 #define GPIO_UartData_IOMUX_RX_FUNC                    IOMUX_PINCM35_PF_UART3_RX
 #define GPIO_UartData_IOMUX_TX_FUNC                    IOMUX_PINCM36_PF_UART3_TX
-#define UartData_BAUD_RATE                                              (115200)
-#define UartData_IBRD_80_MHZ_115200_BAUD                                    (43)
-#define UartData_FBRD_80_MHZ_115200_BAUD                                    (26)
+#define UartData_BAUD_RATE                                               (19200)
+#define UartData_IBRD_80_MHZ_19200_BAUD                                    (260)
+#define UartData_FBRD_80_MHZ_19200_BAUD                                     (27)
 
 
 
