@@ -7,7 +7,6 @@
 #include "autoDeleteThread.hpp"
 #include "gpioInterrupt.hpp"
 #include "gpio.hpp"
-#include "clock.h"
 
 constexpr size_t SystemRxBufferSize = 256;
 constexpr size_t SystemRxBufferCount = 4;
@@ -31,7 +30,6 @@ void balanceThread(void*);
 int main(void)
 {
 	SYSCFG_DL_init();
-	// SysTick_Init();
 
 	xTaskCreate(mainThread, "main", 0x100, nullptr, 1, nullptr);
 

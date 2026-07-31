@@ -180,10 +180,10 @@ PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
 
 PWM2.timerStartTimer                    = true;
 PWM2.pwmMode                            = "EDGE_ALIGN_UP";
-PWM2.$name                              = "Servomotor_Pwm";
 PWM2.timerCount                         = 20000;
 PWM2.ccIndex                            = [1];
 PWM2.clockPrescale                      = 80;
+PWM2.$name                              = "Servo_Pwm";
 PWM2.ccp1PinConfig.direction            = scripting.forceWrite("OUTPUT");
 PWM2.ccp1PinConfig.hideOutputInversion  = scripting.forceWrite(false);
 PWM2.ccp1PinConfig.onlyInternalResistor = scripting.forceWrite(false);

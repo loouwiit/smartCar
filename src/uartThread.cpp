@@ -14,7 +14,7 @@
 #include "stringCompare.hpp"
 #include "mixer.hpp"
 #include "graySensor.hpp"
-#include "serve.hpp"
+#include "servo.hpp"
 #include "mutex.hpp"
 
 extern UART uart;
@@ -25,7 +25,7 @@ extern FPID serveFpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<> script[2];
-extern Serve serve;
+extern Servo servo;
 extern GraySensor graySensor;
 extern bool grayEnable;
 
@@ -148,7 +148,7 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize > 5)
 			deltaCount = atoi(rxBufferSplit[5]);
 
-		int freeEntryIndex = serve.script.getFreeScriptEntryIndex();
+		int freeEntryIndex = servo.script.getFreeScriptEntryIndex();
 		if (freeEntryIndex == -1)
 		{
 			while (uart.isTransiting())
@@ -156,7 +156,7 @@ void dealRecieve(char* recieve)
 			uart.transit("no free script entry!", 21);
 			return;
 		}
-		auto& freeEntry = serve.script[freeEntryIndex];
+		auto& freeEntry = servo.script[freeEntryIndex];
 		freeEntry.strength = strength;
 		freeEntry.duration = pdMS_TO_TICKS(duration);
 
@@ -256,24 +256,24 @@ void dealRecieve(char* recieve)
 	else if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
-		int target = serve[Serve::MixNumber::Uart];
+		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
 		if (delta == 0) delta = 100;
 		target += delta;
-		serve[Serve::MixNumber::Uart] = target;
+		servo[Servo::MixNumber::Uart] = target;
 	}
 	else if (rxBufferSplit[0][0] == '-')
 	{
 		int delta = 10;
-		int target = serve[Serve::MixNumber::Uart];
+		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
 		else delta = atoi(rxBufferSplit[0] + 1);
 		if (delta == 0) delta = 100;
 		target -= delta;
-		serve[Serve::MixNumber::Uart] = target;
+		servo[Servo::MixNumber::Uart] = target;
 	}
 	else if (rxBufferSplit[0][0] == '=')
 	{
@@ -282,8 +282,8 @@ void dealRecieve(char* recieve)
 			target = atoi(rxBufferSplit[1]);
 		else target = atoi(rxBufferSplit[0] + 1);
 		if (target == 0)
-			target = Serve::StandardBalancePoint;
-		serve[Serve::MixNumber::Uart] = target;
+			target = Servo::StandardBalancePoint;
+		servo[Servo::MixNumber::Uart] = target;
 	}
 	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
 	{

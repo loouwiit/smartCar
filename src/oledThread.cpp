@@ -25,9 +25,9 @@ void oledThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("oledThread started\n", 19);
-	OLED_ShowString(0, 0, "time: 0", 8);
-
+	
 	OLED_Init();
+	OLED_ShowString(0, 0, "time: 0", 8);
 	while (true)
 	{
 		auto nowTime = xTaskGetTickCount();

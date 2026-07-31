@@ -5,11 +5,11 @@
 
 #include "script.hpp"
 
-class Serve
+class Servo
 {
 public:
-	Serve() = default;
-	Serve(PWM pwm) : pwm{ pwm } { mixer[MixNumber::Standard] = StandardBalancePoint; }
+	Servo() = default;
+	Servo(PWM pwm) : pwm{ pwm } { mixer[MixNumber::Standard] = StandardBalancePoint; }
 
 	constexpr static unsigned short StandardBalancePoint = 2335;
 

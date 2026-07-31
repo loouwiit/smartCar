@@ -1,6 +1,5 @@
 #include "oled_hardware_i2c.h"
 #include "oledfont.h"
-#include "clock.h"
 
 #include "FreeRTOS.h"
 #include <task.h>
@@ -55,9 +54,9 @@ void oled_i2c_sda_unlock(void)
     do
     {
         DL_GPIO_clearPins(GPIO_I2C_OLED_SCL_PORT, GPIO_I2C_OLED_SCL_PIN);
-        mspm0_delay_ms(1);
+        vTaskDelay(1);
         DL_GPIO_setPins(GPIO_I2C_OLED_SCL_PORT, GPIO_I2C_OLED_SCL_PIN);
-        mspm0_delay_ms(1);
+        vTaskDelay(1);
 
         if (DL_GPIO_readPins(GPIO_I2C_OLED_SDA_PORT, GPIO_I2C_OLED_SDA_PIN))
             break;
@@ -98,8 +97,8 @@ void OLED_DisplayTurn(uint8_t i)
 //mode:数据/命令标志 0,表示命令;1,表示数据;
 void OLED_WR_Byte(uint8_t dat, uint8_t mode)
 {
-    unsigned char ptr[2];
-    unsigned long start, cur;
+    unsigned char ptr[2] = {};
+    TickType_t start = 0;
 
     if (mode)
     {
@@ -112,7 +111,7 @@ void OLED_WR_Byte(uint8_t dat, uint8_t mode)
         ptr[1] = dat;
     }
 
-    mspm0_get_clock_ms(&start);
+    start = xTaskGetTickCount();
 
     DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, ptr, 2);
     DL_I2C_clearInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE);
@@ -121,8 +120,7 @@ void OLED_WR_Byte(uint8_t dat, uint8_t mode)
 
     while (!DL_I2C_getRawInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE))
     {
-        mspm0_get_clock_ms(&cur);
-        if (cur >= (start + I2C_TIMEOUT_MS))
+        if (xTaskGetTickCount() >= (start + I2C_TIMEOUT_MS))
         {
             oled_i2c_sda_unlock();
             break;

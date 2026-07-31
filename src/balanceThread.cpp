@@ -6,14 +6,14 @@
 
 #include "uart.hpp"
 #include "autoDeleteThread.hpp"
-#include "serve.hpp"
+#include "servo.hpp"
 #include "fpid.hpp"
 #include <cstring>
 
 extern UART uart;
 extern UART uartData;
 
-extern Serve serve;
+extern Servo servo;
 FPID serveFpid{};
 static TickType_t lastFpidTime{};
 
@@ -108,7 +108,7 @@ static void balanceRecieve(char* recieve)
 
 	serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
 	if (abs(position - serveFpid.getTarget()) >= 5)
-		serve[Serve::MixNumber::BalanceFeed] = serveFpid.getOut();
+		servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();
 
 	lastFpidTime = nowTime;
 }
