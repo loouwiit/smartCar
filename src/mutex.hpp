@@ -1,43 +1,48 @@
-#error 没写完
+#pragma once
 
-// #pragma once
+#include "FreeRTOS.h"
+#include "semphr.h"
 
-// #include <FreeRTOS.h>
-// #include <semphr.h>
+class Mutex {
+public:
+	Mutex()
+	{
+		rtosMutex = xSemaphoreCreateMutex();
+	}
 
-// class Mutex
-// {
-// public:
-// 	Mutex() { semaphore = xSemaphoreCreateMutex(); }
-// 	~Mutex() { vSemaphoreDelete(semaphore); }
+	~Mutex()
+	{
+		// 确保没有线程持有互斥量
+		while (xSemaphoreTake(rtosMutex, portMAX_DELAY) != pdTRUE)
+			vTaskDelay(1);
+		vSemaphoreDelete(rtosMutex);
+	}
 
-// 	bool get(TickType_t maxWaitTick = 0)
-// 	{
-// 		return xSemaphoreTake(uartSemaphore, maxWaitTick) == pdTRUE;
-// 	}
+	bool try_lock() const
+	{
+		return xSemaphoreTake(rtosMutex, 0) == pdTRUE;
+	}
 
-// 	void release()
-// 	{
-// 		xSemaphoreGive(semaphore);
-// 	}
+	void lock() const
+	{
+		xSemaphoreTake(rtosMutex, portMAX_DELAY);
+	}
 
-// private:
-// 	SemaphoreHandle_t semaphore;
-// };
+	void unlock() const
+	{
+		xSemaphoreGive(rtosMutex);
+	}
 
-// class Lock
-// {
-// public:
-// 	Lock(Mutex& mutex) : mutex{ mutex }
-// 	{
-// 		mutex.get(portMAX_DELAY);
-// 	}
+private:
+	SemaphoreHandle_t rtosMutex;
+};
 
-// 	~Lock()
-// 	{
-// 		mutex.rela
-// 	}
+class Lock
+{
+public:
+	Lock(const Mutex& mutex) : mutex{ mutex } { mutex.lock(); }
+	~Lock() { mutex.unlock(); }
 
-// private:
-// 	Mutex& mutex;
-// };
+private:
+	const Mutex& mutex;
+};

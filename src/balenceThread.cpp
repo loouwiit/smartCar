@@ -26,7 +26,8 @@ static char rxBuffer[rxBufferSize]{};
 static int rxSize = 0;
 static int rxTotolSize = 0;
 
-static void dealRecieve(char* recieve);
+void dealRecieve(char* recieve);
+static void balanceRecieve(char* recieve);
 
 void balanceThread(void*)
 {
@@ -65,7 +66,7 @@ void balanceThread(void*)
 
 					// deal
 					rxBuffer[rxTotolSize] = '\0';
-					dealRecieve(rxBuffer);
+					balanceRecieve(rxBuffer);
 					vTaskDelay(1);
 
 					// XX0AB
@@ -84,8 +85,18 @@ void balanceThread(void*)
 	}
 }
 
-static void dealRecieve(char* recieve)
+static void balanceRecieve(char* recieve)
 {
+	if (recieve[0] == '!')
+	{
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		uart.transit("forward\n", 8);
+
+		dealRecieve(recieve + 1);
+		return;
+	}
+
 	float position = atof(recieve);
 
 	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, serveFpid.portionP, serveFpid.portionI, serveFpid.portionD);

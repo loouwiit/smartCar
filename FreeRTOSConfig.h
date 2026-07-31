@@ -176,5 +176,5 @@
 #define configENFORCE_SYSTEM_CALLS_FROM_KERNEL_ONLY               1
 #define configALLOW_UNPRIVILEGED_CRITICAL_SECTIONS                0
 #define configUSE_MPU_WRAPPERS_V1                                 0
-
+#define configUSE_MUTEXES 1
 #endif /* FREERTOS_CONFIG_H */

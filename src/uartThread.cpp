@@ -15,6 +15,7 @@
 #include "mixer.hpp"
 #include "graySensor.hpp"
 #include "serve.hpp"
+#include "mutex.hpp"
 
 extern UART uart;
 extern float captureSpeeds[2];
@@ -43,8 +44,9 @@ static unsigned char rxSplitSize = 0;
 static int rxSize = 0;
 static int rxTotolSize = 0;
 
-static void dealRecieve(char* recieve);
-static unsigned char splitCommand(char* text, char** commands, char splitChar = ' ');
+static Mutex* mutex{};
+void dealRecieve(char* recieve);
+unsigned char splitCommand(char* text, char** commands, char splitChar = ' ');
 
 void uartThread(void*)
 {
@@ -53,6 +55,8 @@ void uartThread(void*)
 	while (uart.isTransiting())
 		vTaskDelay(1);
 	uart.transit("uart started\n", 14);
+
+	mutex = new Mutex{};
 
 	while (true)
 	{
@@ -113,10 +117,15 @@ void uartThread(void*)
 		}
 		vTaskDelay(configTICK_RATE_HZ / 10);
 	}
+
+	delete mutex;
+	mutex = nullptr;
 }
 
 void dealRecieve(char* recieve)
 {
+	Lock lock{ *mutex };
+
 	rxSplitSize = splitCommand(recieve, rxBufferSplit);
 
 	if (rxBufferSplit[0][0] == '+')
