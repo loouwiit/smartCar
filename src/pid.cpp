@@ -9,9 +9,10 @@ float PID::update(float actual, float deltaT)
 {
 	float error = target - actual;
 	integration += error * deltaT;
-	float delta = -(actual - lastActual) / deltaT;
+	float delta = 0;
+	if (deltaT != 0)
+		delta = -(actual - lastActual) / deltaT;
 	lastActual = actual;
-	if (deltaT == 0) delta = 0;
 
 	// 积分限幅
 	if (integration < integrationRange[0])

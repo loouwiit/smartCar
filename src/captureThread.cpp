@@ -13,8 +13,8 @@
 
 void captureThread(void*);
 unsigned getTime(); // export
-float captureSpeeds[2]{}; // export
-int moveCount[2]{}; // export
+volatile float captureSpeeds[2]{}; // export
+volatile int moveCount[2]{}; // export
 
 Capture capture{ EncoderCapture_INST, EncoderCapture_INST_INT_IRQN };
 

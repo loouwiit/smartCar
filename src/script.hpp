@@ -2,7 +2,7 @@
 
 #include <FreeRTOS.h>
 
-extern int moveCount[2];
+extern volatile int moveCount[2];
 
 template <class T = float, unsigned Size = 10>
 class Script

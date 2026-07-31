@@ -18,8 +18,8 @@
 #include "mutex.hpp"
 
 extern UART uart;
-extern float captureSpeeds[2];
-extern int moveCount[2];
+extern volatile float captureSpeeds[2];
+extern volatile int moveCount[2];
 extern FPID fpid[2];
 extern FPID serveFpid[2];
 extern Motor motor[2];
@@ -27,7 +27,7 @@ extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<> script[2];
 extern Servo servo;
 extern GraySensor graySensor;
-extern bool grayEnable;
+extern volatile bool grayEnable;
 
 extern TickType_t oledTimeStart;
 extern TickType_t oledTimeStop;
@@ -41,13 +41,14 @@ static int txSize = 0;
 constexpr int rxBufferSize = 256;
 static char rxBuffer[rxBufferSize]{};
 static char* rxBufferSplit[64]{};
+static unsigned char rxTokenLength[64]{};
 static unsigned char rxSplitSize = 0;
 static int rxSize = 0;
 static int rxTotolSize = 0;
 
-static Mutex* mutex{};
+Mutex mutex{};
 void dealRecieve(char* recieve);
-unsigned char splitCommand(char* text, char** commands, char splitChar = ' ');
+unsigned char splitCommand(char* text, char** commands, unsigned char* lengths, char splitChar = ' ');
 
 void uartThread(void*)
 {
@@ -55,9 +56,7 @@ void uartThread(void*)
 
 	while (uart.isTransiting())
 		vTaskDelay(1);
-	uart.transit("uart started\n", 14);
-
-	mutex = new Mutex{};
+	uart.transit("uart started\n", 13);
 
 	while (true)
 	{
@@ -118,18 +117,15 @@ void uartThread(void*)
 		}
 		vTaskDelay(configTICK_RATE_HZ / 10);
 	}
-
-	delete mutex;
-	mutex = nullptr;
 }
 
 void dealRecieve(char* recieve)
 {
-	Lock lock{ *mutex };
+	const char* errorMessage = nullptr;
 
-	rxSplitSize = splitCommand(recieve, rxBufferSplit);
+	rxSplitSize = splitCommand(recieve, rxBufferSplit, rxTokenLength);
 
-	if (rxBufferSplit[0][0] == 's' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "script", 6))
+	if (rxBufferSplit[0][0] == 's' || stringCompare(rxBufferSplit[0], rxTokenLength[0], "script", 6))
 	{
 		if (rxSplitSize <= 2) return;
 		int strength = atoi(rxBufferSplit[1]);
@@ -148,13 +144,13 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize > 5)
 			deltaCount = atoi(rxBufferSplit[5]);
 
+		Lock lock{ mutex };
+
 		int freeEntryIndex = servo.script.getFreeScriptEntryIndex();
 		if (freeEntryIndex == -1)
 		{
-			while (uart.isTransiting())
-				vTaskDelay(1);
-			uart.transit("no free script entry!", 21);
-			return;
+			errorMessage = "no free script entry!";
+			goto sendError;
 		}
 		auto& freeEntry = servo.script[freeEntryIndex];
 		freeEntry.strength = strength;
@@ -167,7 +163,7 @@ void dealRecieve(char* recieve)
 		if (deltaCount != 0)
 			freeEntry.stopCount = freeEntry.startCount + deltaCount;
 	}
-	else if (rxBufferSplit[0][0] == 'm' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "move", 4))
+	else if (rxBufferSplit[0][0] == 'm' || stringCompare(rxBufferSplit[0], rxTokenLength[0], "move", 4))
 	{
 		if (rxSplitSize <= 3) return;
 		float speed = atof(rxBufferSplit[1]);
@@ -189,46 +185,53 @@ void dealRecieve(char* recieve)
 
 		if (duration == 0 && deltaCount == 0)
 		{
-			uart.transit("duration and deltaCount cannot be both 0!\n", 42);
-			return;
+			errorMessage = "duration and deltaCount cannot be both 0!\n";
+			goto sendError;
 		}
 
 		int scriptIndex[2]{};
 
 		while (true)
 		{
-			scriptIndex[0] = script[0].getFreeScriptEntryIndex();
-			scriptIndex[1] = script[1].getFreeScriptEntryIndex();
-			if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
-				break;
+			{
+				Lock lock{ mutex };
+
+				scriptIndex[0] = script[0].getFreeScriptEntryIndex();
+				scriptIndex[1] = script[1].getFreeScriptEntryIndex();
+				if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
+				{
+					Script<>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+
+					for (auto& i : scriptEntry)
+					{
+						i->duration = duration == 0 ? portMAX_DELAY : pdMS_TO_TICKS(duration);
+
+						if (delayTime != 0)
+							i->delay = delayTime;
+						if (delayCount != 0)
+							i->startCount = moveCount[0] + moveCount[1] + delayCount;
+						if (deltaCount != 0)
+							i->stopCount = i->startCount + deltaCount;
+					}
+
+					float speedLeft = speed - rotate;
+					float speedRight = speed + rotate;
+					scriptEntry[0]->strength = speedLeft;
+					scriptEntry[1]->strength = speedRight;
+					break;
+				}
+			}
+
 			while (uart.isTransiting())
 				vTaskDelay(1);
 			uart.transit("no free script entry!\n", 22);
 			vTaskDelay(1);
 		}
-
-		Script<>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
-
-		for (auto& i : scriptEntry)
-		{
-			i->duration = duration == 0 ? portMAX_DELAY : pdMS_TO_TICKS(duration);
-
-			if (delayTime != 0)
-				i->delay = delayTime;
-			if (delayCount != 0)
-				i->startCount = moveCount[0] + moveCount[1] + delayCount;
-			if (deltaCount != 0)
-				i->stopCount = i->startCount + deltaCount;
-		}
-
-		float speedLeft = speed - rotate;
-		float speedRight = speed + rotate;
-		scriptEntry[0]->strength = speedLeft;
-		scriptEntry[1]->strength = speedRight;
 	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "track", 5))
+	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "track", 5))
 	{
 		if (rxSplitSize <= 1) return;
+		Lock lock{ mutex };
 		if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'n')
 		{
 			grayEnable = true;
@@ -244,18 +247,20 @@ void dealRecieve(char* recieve)
 			mixer[1].disable(MixNumber::GraySensor);
 		}
 	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "time", 4))
+	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "time", 4))
 	{
 		TickType_t timeOffset = 0;
 		if (rxSplitSize > 1)
 			timeOffset = atoi(rxBufferSplit[1]);
 
+		Lock lock{ mutex };
 		oledTimeStart = xTaskGetTickCount() + timeOffset;
 		oledTimeStop = portMAX_DELAY;
 	}
 	else if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
+		Lock lock{ mutex };
 		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
@@ -267,6 +272,7 @@ void dealRecieve(char* recieve)
 	else if (rxBufferSplit[0][0] == '-')
 	{
 		int delta = 10;
+		Lock lock{ mutex };
 		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
@@ -277,6 +283,7 @@ void dealRecieve(char* recieve)
 	}
 	else if (rxBufferSplit[0][0] == '=')
 	{
+		Lock lock{ mutex };
 		int target{};
 		if (rxSplitSize > 1)
 			target = atoi(rxBufferSplit[1]);
@@ -285,13 +292,15 @@ void dealRecieve(char* recieve)
 			target = Servo::StandardBalancePoint;
 		servo[Servo::MixNumber::Uart] = target;
 	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "pid", 3))
+	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "pid", 3))
 	{
 		if (rxSplitSize < 4) return;
 
 		float kp = atof(rxBufferSplit[1]);
 		float ki = atof(rxBufferSplit[2]);
 		float kd = atof(rxBufferSplit[3]);
+
+		Lock lock{ mutex };
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -304,7 +313,7 @@ void dealRecieve(char* recieve)
 			serveFpid[i].clearIntegration();
 		}
 	}
-	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "target", 6))
+	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "target", 6))
 	{
 		if (rxSplitSize < 3) return;
 
@@ -313,13 +322,17 @@ void dealRecieve(char* recieve)
 
 		float speed = atof(rxBufferSplit[2]);
 
+		Lock lock{ mutex };
+
 		mixer[index][MixNumber::Uart] = speed;
 
 		if (speed == 0)
 			fpid[index].clearIntegration();
 	}
-	else if (prefixCompare(rxBufferSplit[0], strlen(rxBufferSplit[0]), "close", 5))
+	else if (prefixCompare(rxBufferSplit[0], rxTokenLength[0], "close", 5))
 	{
+		Lock lock{ mutex };
+
 		for (int i = 0; i < 2; i++)
 
 		{
@@ -334,23 +347,37 @@ void dealRecieve(char* recieve)
 			fpid[i].setTarget(0);;
 		}
 	}
+
+sendError:
+	if (errorMessage)
+	{
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		uart.transit(errorMessage, strlen(errorMessage));
+	}
 }
 
-unsigned char splitCommand(char* text, char** commands, char splitChar)
+unsigned char splitCommand(char* text, char** commands, unsigned char* lengths, char splitChar)
 {
 	unsigned char index = 0;
 	commands[index] = text;
 	index++;
-	for (;*text != '\0';text++)
+	unsigned char length = 0;
+	for (; *text != '\0'; text++)
 	{
 		if (*text == splitChar)
 		{
 			*text = '\0';
+			lengths[index - 1] = length;
 			text++;
 			commands[index] = text;
 			index++;
+			length = 0;
 		}
+		else
+			length++;
 	}
+	lengths[index - 1] = length;
 
 	return index;
 }

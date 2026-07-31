@@ -9,12 +9,14 @@
 #include "uart.hpp"
 #include "autoDeleteThread.hpp"
 #include "servo.hpp"
+#include "mutex.hpp"
 
 extern UART uart;
+extern Mutex mutex;
 
 Servo servo{ { Servo_Pwm_INST, GPIO_Servo_Pwm_C1_IDX } };
 
-void servemoterThread(void*)
+void servoThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
 
@@ -26,7 +28,10 @@ void servemoterThread(void*)
 
 	while (true)
 	{
-		servo.mix();
+		{
+			Lock lock{ mutex };
+			servo.mix();
+		}
 		vTaskDelay(10);
 	}
 }

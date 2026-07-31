@@ -8,12 +8,14 @@
 #include "autoDeleteThread.hpp"
 #include "servo.hpp"
 #include "fpid.hpp"
+#include "mutex.hpp"
 #include <cstring>
 
 extern UART uart;
 extern UART uartData;
 
 extern Servo servo;
+extern Mutex mutex;
 FPID serveFpid{};
 static TickType_t lastFpidTime{};
 
@@ -101,14 +103,20 @@ static void balanceRecieve(char* recieve)
 
 	float position = atof(recieve);
 
-	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, serveFpid.portionP, serveFpid.portionI, serveFpid.portionD);
-	uart.transit(txBuffer, txSize);
-
+	float portionP, portionI, portionD;
 	auto nowTime = xTaskGetTickCount();
 
-	serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
-	if (abs(position - serveFpid.getTarget()) >= 5)
-		servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();
+	{
+		Lock lock{ mutex };
+		serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
+		if (abs(position - serveFpid.getTarget()) >= 5)
+			servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();
+		portionP = serveFpid.portionP;
+		portionI = serveFpid.portionI;
+		portionD = serveFpid.portionD;
+		lastFpidTime = nowTime;
+	}
 
-	lastFpidTime = nowTime;
+	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, portionP, portionI, portionD);
+	uart.transit(txBuffer, txSize);
 }

@@ -10,11 +10,11 @@
 
 static char buffer[32]{};
 constexpr static TickType_t oledTimeStartCoolDown = 1000;
-TickType_t oledTimeStart{}; // 启动计时判定
-TickType_t oledTimeStop{}; // 结束计时判定
+volatile TickType_t oledTimeStart{}; // 启动计时判定
+volatile TickType_t oledTimeStop{}; // 结束计时判定
 
 extern UART uart;
-extern int moveCount[2];
+extern volatile int moveCount[2];
 
 void oledThread(void*)
 {

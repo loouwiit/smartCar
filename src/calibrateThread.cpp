@@ -16,7 +16,7 @@
 extern UART uart;
 extern GraySensor graySensor;
 
-bool calibrating{};
+volatile bool calibrating{};
 
 static GPIO key{ KEY_PORT, KEY_KEY_1_PIN };
 static GPIO led{ LED_PORT,LED_G_PIN };
@@ -24,6 +24,10 @@ static GPIO led{ LED_PORT,LED_G_PIN };
 void calibrateThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
+
+	// 阻塞等待按键长按触发的任务通知（由 keyRelease 中断发出）
+	ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
 	int low[8]{}, high[8]{}, threshold[8]{};
 	char txBuffer[128]{};
 	int txSize{};

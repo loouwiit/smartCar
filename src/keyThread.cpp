@@ -13,18 +13,21 @@
 #include "fpid.hpp"
 #include "mixer.hpp"
 #include "script.hpp"
+#include "mutex.hpp"
 
 extern UART uart;
 extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<> script[2];
 
-extern bool grayEnable;
-extern bool calibrating;
+extern volatile bool grayEnable;
+extern volatile bool calibrating;
 
-extern TickType_t oledTimeStart;
-extern TickType_t oledTimeStop;
+extern volatile TickType_t oledTimeStart;
+extern volatile TickType_t oledTimeStop;
 
-extern int moveCount[2];
+extern volatile int moveCount[2];
+extern TaskHandle_t calibrateTaskHandle;
+extern Mutex mutex;
 static int targetCount{};
 constexpr int roundCount = 10370;
 constexpr TickType_t StartTimeCoolDown = pdMS_TO_TICKS(2000);
@@ -35,8 +38,7 @@ static TickType_t keyPressTime = 0;
 
 static void keyPress();
 static void keyRelease();
-bool started = true;
-void start(); // key
+volatile bool started = true;
 void stop(); // turn
 
 void keyThread(void*)
@@ -47,7 +49,7 @@ void keyThread(void*)
 
 	while (uart.isTransiting())
 		vTaskDelay(1);
-	uart.transit("key started\n", 14);
+	uart.transit("key started\n", 12);
 
 	while (true)
 	{
@@ -63,70 +65,93 @@ void keyThread(void*)
 		vTaskDelay(StartTimeCoolDown);
 		grayEnable = true;
 
-		targetCount = moveCount[0] + moveCount[1] + roundCount * 2;
-
 		int scriptIndex[2]{};
+		Script<>::ScriptEntry* scriptEntry[2]{};
+
+		{
+			Lock lock{ mutex };
+			targetCount = moveCount[0] + moveCount[1] + roundCount * 2;
+		}
 
 		while (true)
 		{
-			scriptIndex[0] = script[0].getFreeScriptEntryIndex();
-			scriptIndex[1] = script[1].getFreeScriptEntryIndex();
-			if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
-				break;
+			{
+				Lock lock{ mutex };
+				scriptIndex[0] = script[0].getFreeScriptEntryIndex();
+				scriptIndex[1] = script[1].getFreeScriptEntryIndex();
+				if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
+					break;
+			}
 			while (uart.isTransiting())
 				vTaskDelay(1);
 			uart.transit("cannot find free script entry!\n", 31);
 			vTaskDelay(1);
 		}
 
-		Script<>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
-
-		for (auto& i : scriptEntry)
 		{
-			i->strength = +KeySpeed;
-			i->duration = portMAX_DELAY;
-			i->delay = 0;
-			i->stopCount = targetCount;
+			Lock lock{ mutex };
+
+			scriptEntry[0] = &script[0][scriptIndex[0]];
+			scriptEntry[1] = &script[1][scriptIndex[1]];
+
+			for (auto& i : scriptEntry)
+			{
+				i->strength = +KeySpeed;
+				i->duration = portMAX_DELAY;
+				i->delay = 0;
+				i->stopCount = targetCount;
+			}
+
+			oledTimeStart = xTaskGetTickCount();
+			oledTimeStop = portMAX_DELAY;
+
+			mixer[0].enable(MixNumber::GraySensor);
+			mixer[1].enable(MixNumber::GraySensor);
 		}
 
-		oledTimeStart = xTaskGetTickCount();
-		oledTimeStop = portMAX_DELAY;
+		// 运行中禁用按键回调，防止误触（stop() 时会恢复）
+		GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, nullptr, nullptr);
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
 		uart.transit("started\n", 8);
 
-		mixer[0].enable(MixNumber::GraySensor);
-		mixer[1].enable(MixNumber::GraySensor);
-
-		while (scriptEntry[0]->strength != 0 || scriptEntry[1]->strength != 0)
+		while (true)
+		{
+			{
+				Lock lock{ mutex };
+				if (scriptEntry[0]->strength == 0 && scriptEntry[1]->strength == 0)
+					break;
+			}
 			vTaskDelay(pdMS_TO_TICKS(100));
+		}
 	}
 }
 
 void keyPress()
 {
-	keyPressTime = xTaskGetTickCount();
+	keyPressTime = xTaskGetTickCountFromISR();
 }
 
 void keyRelease()
 {
-	auto pressTime = xTaskGetTickCount() - keyPressTime;
+	auto pressTime = xTaskGetTickCountFromISR() - keyPressTime;
 	if (pressTime > longPressTime)
 	{
 		calibrating = true;
-		void calibrateThread(void*);
-		xTaskCreate(calibrateThread, "calibrate", 0x100, nullptr, 2, nullptr);
+
+		// 通过任务通知唤醒 calibrateThread（任务在启动时创建，ISR 只发信号）
+		BaseType_t higherPriorityTaskWoken = pdFALSE;
+		if (calibrateTaskHandle != nullptr)
+		{
+			xTaskNotifyFromISR(calibrateTaskHandle, 0, eNoAction, &higherPriorityTaskWoken);
+			portYIELD_FROM_ISR(higherPriorityTaskWoken);
+		}
 	}
-	else start();
-}
-
-void start()
-{
-	if (started || calibrating) return;
-	started = true;
-
-	GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, nullptr, nullptr);
+	else if (!started && !calibrating)
+	{
+		started = true;
+	}
 }
 
 void stop()
@@ -136,11 +161,14 @@ void stop()
 
 	GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, keyRelease, keyPress);
 
-	grayEnable = false;
+	{
+		Lock lock{ mutex };
+		grayEnable = false;
 
-	script[0].clear();
-	script[1].clear();
+		script[0].clear();
+		script[1].clear();
 
-	mixer[0].disable(MixNumber::GraySensor);
-	mixer[1].disable(MixNumber::GraySensor);
+		mixer[0].disable(MixNumber::GraySensor);
+		mixer[1].disable(MixNumber::GraySensor);
+	}
 }
