@@ -29,7 +29,8 @@ extern Serve serve;
 extern GraySensor graySensor;
 extern bool grayEnable;
 
-extern int RoundCount;
+extern TickType_t oledTimeStart;
+extern TickType_t oledTimeStop;
 
 extern float pitch, roll, yaw;
 
@@ -242,6 +243,15 @@ void dealRecieve(char* recieve)
 			mixer[0].disable(MixNumber::GraySensor);
 			mixer[1].disable(MixNumber::GraySensor);
 		}
+	}
+	else if (stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "time", 4))
+	{
+		TickType_t timeOffset = 0;
+		if (rxSplitSize > 1)
+			timeOffset = atoi(rxBufferSplit[1]);
+
+		oledTimeStart = xTaskGetTickCount() + timeOffset;
+		oledTimeStop = portMAX_DELAY;
 	}
 	else if (rxBufferSplit[0][0] == '+')
 	{

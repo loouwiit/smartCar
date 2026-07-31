@@ -21,6 +21,9 @@ extern Script<> script[2];
 extern bool grayEnable;
 extern bool calibrating;
 
+extern TickType_t oledTimeStart;
+extern TickType_t oledTimeStop;
+
 extern int moveCount[2];
 static int targetCount{};
 constexpr int roundCount = 10370;
@@ -85,6 +88,9 @@ void keyThread(void*)
 			i->delay = 0;
 			i->stopCount = targetCount;
 		}
+
+		oledTimeStart = xTaskGetTickCount();
+		oledTimeStop = portMAX_DELAY;
 
 		while (uart.isTransiting())
 			vTaskDelay(1);
