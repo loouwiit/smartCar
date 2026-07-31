@@ -6,7 +6,7 @@
 		{
 			"label": "build",
 			"type": "shell",
-			"command": "make"
+			"command": "make -j16"
 		},
 		{
 			"label": "flash",
