@@ -14,6 +14,7 @@
 extern UART uart;
 extern UART uartData;
 
+constexpr static int DeadZone = 5;
 extern Servo servo;
 extern Mutex* mutex;
 FPID serveFpid{};
@@ -42,10 +43,10 @@ void balanceThread(void*)
 	serveFpid.outputRange[0] = -150;
 	serveFpid.outputRange[1] = +150;
 
-	serveFpid.kp = 3;
-	serveFpid.kd = 50;
+	serveFpid.kp = 7;
+	serveFpid.kd = 5000;
 
-	serveFpid.setTarget(70);
+	serveFpid.setTarget(120);
 
 	while (true)
 	{
@@ -101,7 +102,7 @@ static void balanceRecieve(char* recieve)
 		return;
 	};
 
-	float position = atof(recieve);
+	float position = 250.0f - atof(recieve);
 
 	float portionP, portionI, portionD;
 	auto nowTime = xTaskGetTickCount();
@@ -109,8 +110,9 @@ static void balanceRecieve(char* recieve)
 	{
 		Lock lock{ *mutex };
 		serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
-		if (abs(position - serveFpid.getTarget()) >= 5)
+		if (abs(position - serveFpid.getTarget()) >= DeadZone)
 			servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();
+		else servo[Servo::MixNumber::BalanceFeed] = 0;
 		portionP = serveFpid.portionP;
 		portionI = serveFpid.portionI;
 		portionD = serveFpid.portionD;

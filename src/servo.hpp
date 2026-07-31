@@ -11,7 +11,7 @@ public:
 	Servo() = default;
 	Servo(PWM pwm) : pwm{ pwm } { mixer[MixNumber::Standard] = StandardBalancePoint; }
 
-	constexpr static unsigned short StandardBalancePoint = 2335;
+	constexpr static unsigned short StandardBalancePoint = 2285;
 
 	class MixNumber
 	{
