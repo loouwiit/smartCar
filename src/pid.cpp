@@ -10,6 +10,7 @@ float PID::update(float actual, float deltaT)
 	float error = target - actual;
 	integration += error * deltaT;
 	float delta = -(actual - lastActual) / deltaT;
+	lastActual = actual;
 	if (deltaT == 0) delta = 0;
 
 	// 积分限幅
@@ -21,6 +22,12 @@ float PID::update(float actual, float deltaT)
 	float p = kp * error;
 	float i = ki * integration;
 	float d = kd * delta;
+
+#if PID_DEBUG
+	portionP = p;
+	portionI = i;
+	portionD = d;
+#endif
 
 	out = p + i + d;
 

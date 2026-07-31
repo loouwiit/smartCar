@@ -17,6 +17,12 @@ public:
 	using PID::kp;
 	using PID::ki;
 	using PID::kd;
+	
+#if PID_DEBUG // for debug
+	using PID::portionP;
+	using PID::portionI;
+	using PID::portionD;
+#endif
 
 	using PID::integrationRange;
 	float(&pidOutputRange)[2] = PID::outputRange;

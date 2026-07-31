@@ -6,6 +6,8 @@
 //	^		(|)
 // actual	(<)
 
+#define PID_DEBUG true
+
 class PID
 {
 public:
@@ -14,6 +16,12 @@ public:
 	float kp = 0.0f;
 	float ki = 0.0f;
 	float kd = 0.0f;
+
+#if PID_DEBUG // for debug
+	float portionP{};
+	float portionI{};
+	float portionD{};
+#endif
 
 	float integrationRange[2] = { -1.0f / 0.0f, +1.0f / 0.0f };
 	float outputRange[2] = { -1.0f / 0.0f, +1.0f / 0.0f };
