@@ -15,6 +15,7 @@ extern UART uartData;
 
 extern Serve serve;
 FPID serveFpid{};
+static TickType_t lastFpidTime{};
 
 constexpr int txBufferSize = 64;
 static char txBuffer[txBufferSize] = "";
@@ -90,7 +91,11 @@ static void dealRecieve(char* recieve)
 	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, serveFpid.portionP, serveFpid.portionI, serveFpid.portionD);
 	uart.transit(txBuffer, txSize);
 
-	serveFpid.update(position);
+	auto nowTime = xTaskGetTickCount();
+
+	serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
 	if (abs(position - serveFpid.getTarget()) >= 5)
 		serve[Serve::MixNumber::BalanceFeed] = serveFpid.getOut();
+
+	lastFpidTime = nowTime;
 }
