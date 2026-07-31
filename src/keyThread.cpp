@@ -27,7 +27,7 @@ extern volatile TickType_t oledTimeStop;
 
 extern volatile int moveCount[2];
 extern TaskHandle_t calibrateTaskHandle;
-extern Mutex mutex;
+extern Mutex* mutex;
 static int targetCount{};
 constexpr int roundCount = 10370;
 constexpr TickType_t StartTimeCoolDown = pdMS_TO_TICKS(2000);
@@ -69,14 +69,14 @@ void keyThread(void*)
 		Script<>::ScriptEntry* scriptEntry[2]{};
 
 		{
-			Lock lock{ mutex };
+			Lock lock{ *mutex };
 			targetCount = moveCount[0] + moveCount[1] + roundCount * 2;
 		}
 
 		while (true)
 		{
 			{
-				Lock lock{ mutex };
+				Lock lock{ *mutex };
 				scriptIndex[0] = script[0].getFreeScriptEntryIndex();
 				scriptIndex[1] = script[1].getFreeScriptEntryIndex();
 				if (scriptIndex[0] != -1 && scriptIndex[1] != -1)
@@ -89,7 +89,7 @@ void keyThread(void*)
 		}
 
 		{
-			Lock lock{ mutex };
+			Lock lock{ *mutex };
 
 			scriptEntry[0] = &script[0][scriptIndex[0]];
 			scriptEntry[1] = &script[1][scriptIndex[1]];
@@ -119,7 +119,7 @@ void keyThread(void*)
 		while (true)
 		{
 			{
-				Lock lock{ mutex };
+				Lock lock{ *mutex };
 				if (scriptEntry[0]->strength == 0 && scriptEntry[1]->strength == 0)
 					break;
 			}
@@ -162,7 +162,7 @@ void stop()
 	GpioInterrupt::setCallback(KEY_PORT, KEY_KEY_1_PIN, keyRelease, keyPress);
 
 	{
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		grayEnable = false;
 
 		script[0].clear();

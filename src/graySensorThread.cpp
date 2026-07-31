@@ -11,7 +11,7 @@
 #include "cstdio"
 
 extern UART uart;
-extern Mutex mutex;
+extern Mutex* mutex;
 GraySensor graySensor = { {GraySensor_GraySensorA_PORT, GraySensor_GraySensorA_PIN},{GraySensor_GraySensorB_PORT, GraySensor_GraySensorB_PIN},{GraySensor_GraySensorC_PORT, GraySensor_GraySensorC_PIN}, GraySensorAdc_INST,GraySensorAdc_ADCMEM_Cha };
 
 extern FPID fpid[2];
@@ -87,7 +87,7 @@ void graySensorThread(void*)
 		{
 			lastGray = graySpeed;
 
-			Lock lock{ mutex };
+			Lock lock{ *mutex };
 			mixer[0][MixNumber::GraySensor] = +graySpeed;
 			mixer[1][MixNumber::GraySensor] = -graySpeed;
 		}

@@ -15,7 +15,7 @@ extern UART uart;
 extern UART uartData;
 
 extern Servo servo;
-extern Mutex mutex;
+extern Mutex* mutex;
 FPID serveFpid{};
 static TickType_t lastFpidTime{};
 
@@ -107,7 +107,7 @@ static void balanceRecieve(char* recieve)
 	auto nowTime = xTaskGetTickCount();
 
 	{
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		serveFpid.update(position, ((float)nowTime - (float)lastFpidTime));
 		if (abs(position - serveFpid.getTarget()) >= 5)
 			servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();

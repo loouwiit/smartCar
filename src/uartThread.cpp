@@ -46,7 +46,7 @@ static unsigned char rxSplitSize = 0;
 static int rxSize = 0;
 static int rxTotolSize = 0;
 
-Mutex mutex{};
+extern Mutex* mutex;
 void dealRecieve(char* recieve);
 unsigned char splitCommand(char* text, char** commands, unsigned char* lengths, char splitChar = ' ');
 
@@ -144,7 +144,7 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize > 5)
 			deltaCount = atoi(rxBufferSplit[5]);
 
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 
 		int freeEntryIndex = servo.script.getFreeScriptEntryIndex();
 		if (freeEntryIndex == -1)
@@ -194,7 +194,7 @@ void dealRecieve(char* recieve)
 		while (true)
 		{
 			{
-				Lock lock{ mutex };
+				Lock lock{ *mutex };
 
 				scriptIndex[0] = script[0].getFreeScriptEntryIndex();
 				scriptIndex[1] = script[1].getFreeScriptEntryIndex();
@@ -231,7 +231,7 @@ void dealRecieve(char* recieve)
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "track", 5))
 	{
 		if (rxSplitSize <= 1) return;
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		if (rxBufferSplit[1][0] == 'o' && rxBufferSplit[1][1] == 'n')
 		{
 			grayEnable = true;
@@ -253,14 +253,14 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize > 1)
 			timeOffset = atoi(rxBufferSplit[1]);
 
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		oledTimeStart = xTaskGetTickCount() + timeOffset;
 		oledTimeStop = portMAX_DELAY;
 	}
 	else if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
@@ -272,7 +272,7 @@ void dealRecieve(char* recieve)
 	else if (rxBufferSplit[0][0] == '-')
 	{
 		int delta = 10;
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		int target = servo[Servo::MixNumber::Uart];
 		if (rxSplitSize > 1)
 			delta = atoi(rxBufferSplit[1]);
@@ -283,7 +283,7 @@ void dealRecieve(char* recieve)
 	}
 	else if (rxBufferSplit[0][0] == '=')
 	{
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 		int target{};
 		if (rxSplitSize > 1)
 			target = atoi(rxBufferSplit[1]);
@@ -300,7 +300,7 @@ void dealRecieve(char* recieve)
 		float ki = atof(rxBufferSplit[2]);
 		float kd = atof(rxBufferSplit[3]);
 
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 
 		for (int i = 0; i < 2; i++)
 		{
@@ -322,7 +322,7 @@ void dealRecieve(char* recieve)
 
 		float speed = atof(rxBufferSplit[2]);
 
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 
 		mixer[index][MixNumber::Uart] = speed;
 
@@ -331,7 +331,7 @@ void dealRecieve(char* recieve)
 	}
 	else if (prefixCompare(rxBufferSplit[0], rxTokenLength[0], "close", 5))
 	{
-		Lock lock{ mutex };
+		Lock lock{ *mutex };
 
 		for (int i = 0; i < 2; i++)
 

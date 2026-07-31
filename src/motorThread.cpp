@@ -19,7 +19,7 @@ extern UART uart;
 extern unsigned getTime();
 extern volatile float captureSpeeds[2];
 extern volatile int moveCount[2];
-extern Mutex mutex;
+extern Mutex* mutex;
 
 Motor motor[2]{
 	{{{Motor_A2_PORT, Motor_A2_PIN}, {Motor_A1_PORT, Motor_A1_PIN}}, {Motor_Pwm_INST, Timer::TimerCcIndex::DL_TIMER_CC_0_INDEX}},
@@ -82,7 +82,7 @@ void motorThread(void*)
 
 		for (int i = 0; i < 2; i++)
 		{
-			Lock lock{ mutex };
+			Lock lock{ *mutex };
 
 			if (captureSpeeds[i] == 0.0f && fpid[i].getTarget() == 0.0f) fpid[i].clearIntegration();
 

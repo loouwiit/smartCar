@@ -12,7 +12,7 @@
 #include "mutex.hpp"
 
 extern UART uart;
-extern Mutex mutex;
+extern Mutex* mutex;
 
 Servo servo{ { Servo_Pwm_INST, GPIO_Servo_Pwm_C1_IDX } };
 
@@ -29,7 +29,7 @@ void servoThread(void*)
 	while (true)
 	{
 		{
-			Lock lock{ mutex };
+			Lock lock{ *mutex };
 			servo.mix();
 		}
 		vTaskDelay(10);

@@ -8,6 +8,7 @@
 #include "gpioInterrupt.hpp"
 #include "gpio.hpp"
 #include <cstring>
+#include "mutex.hpp"
 
 constexpr size_t SystemRxBufferSize = 256;
 constexpr size_t SystemRxBufferCount = 4;
@@ -17,6 +18,7 @@ constexpr size_t UserRxBufferCount = 16;
 
 UART uart{};
 UART uartData{};
+Mutex* mutex{};
 
 TaskHandle_t calibrateTaskHandle = nullptr;
 
@@ -49,6 +51,8 @@ int main(void)
 void mainThread(void*)
 {
 	AutoDeleteThread autoDeleteThread{};
+
+	mutex = new Mutex{};
 
 	void uartInit();
 	uartInit();
