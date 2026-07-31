@@ -24,7 +24,7 @@ extern FPID fpid[2];
 extern FPID serveFpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
-extern Script<float, 10> script[2];
+extern Script<> script[2];
 extern Serve serve;
 extern GraySensor graySensor;
 extern bool grayEnable;
@@ -133,9 +133,19 @@ void dealRecieve(char* recieve)
 		if (rxSplitSize <= 2) return;
 		int strength = atoi(rxBufferSplit[1]);
 		int duration = atoi(rxBufferSplit[2]);
-		int offset = 0;
+
+		int delay = 0;
+		int delayCount = 0;
+		int deltaCount = 0;
+
 		if (rxSplitSize > 3)
-			offset = atoi(rxBufferSplit[3]);
+			delay = atoi(rxBufferSplit[3]);
+
+		if (rxSplitSize > 4)
+			delayCount = atoi(rxBufferSplit[4]);
+
+		if (rxSplitSize > 5)
+			deltaCount = atoi(rxBufferSplit[5]);
 
 		int freeEntryIndex = serve.script.getFreeScriptEntryIndex();
 		if (freeEntryIndex == -1)
@@ -146,15 +156,41 @@ void dealRecieve(char* recieve)
 			return;
 		}
 		auto& freeEntry = serve.script[freeEntryIndex];
-		freeEntry.startTime = xTaskGetTickCount() + offset;
-		freeEntry.expireTime = freeEntry.startTime + pdMS_TO_TICKS(duration);
 		freeEntry.strength = strength;
+		freeEntry.duration = pdMS_TO_TICKS(duration);
+
+		if (delay != 0)
+			freeEntry.delay = delay;
+		if (delayCount != 0)
+			freeEntry.startCount = moveCount[0] + moveCount[1] + delayCount;
+		if (deltaCount != 0)
+			freeEntry.stopCount = freeEntry.startCount + deltaCount;
 	}
 	else if (rxBufferSplit[0][0] == 'm' || stringCompare(rxBufferSplit[0], rxBufferSplit[1] - rxBufferSplit[0] - 1, "move", 4))
 	{
-		if (rxSplitSize < 3) return;
+		if (rxSplitSize <= 3) return;
 		float speed = atof(rxBufferSplit[1]);
 		float rotate = atof(rxBufferSplit[2]);
+		int duration = atoi(rxBufferSplit[3]);
+
+		int delayTime{};
+		int delayCount{};
+		int deltaCount{};
+
+		if (rxSplitSize > 4)
+			delayTime = atoi(rxBufferSplit[4]);
+
+		if (rxSplitSize > 5)
+			delayCount = atoi(rxBufferSplit[5]);
+
+		if (rxSplitSize > 6)
+			deltaCount = atoi(rxBufferSplit[6]);
+
+		if (duration == 0 && deltaCount == 0)
+		{
+			uart.transit("duration and deltaCount cannot be both 0!\n", 42);
+			return;
+		}
 
 		int scriptIndex[2]{};
 
@@ -170,22 +206,18 @@ void dealRecieve(char* recieve)
 			vTaskDelay(1);
 		}
 
-		Script<float, 10>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+		Script<>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
 
-		int delay{};
-		int duration{};
-
-		if (rxSplitSize > 3)
-			duration = atoi(rxBufferSplit[3]);
-
-		if (rxSplitSize > 4)
-			delay = atoi(rxBufferSplit[4]);
-
-		auto nowTime = xTaskGetTickCount();
 		for (auto& i : scriptEntry)
 		{
-			i->startTime = nowTime + delay;
-			i->expireTime = i->startTime + duration;
+			i->duration = duration == 0 ? portMAX_DELAY : pdMS_TO_TICKS(duration);
+
+			if (delayTime != 0)
+				i->delay = delayTime;
+			if (delayCount != 0)
+				i->startCount = moveCount[0] + moveCount[1] + delayCount;
+			if (deltaCount != 0)
+				i->stopCount = i->startCount + deltaCount;
 		}
 
 		float speedLeft = speed - rotate;

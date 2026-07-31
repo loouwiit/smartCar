@@ -16,7 +16,7 @@
 
 extern UART uart;
 extern Mixer<float, MixNumber::Count> mixer[2];
-extern Script<float, 10> script[2];
+extern Script<> script[2];
 
 extern bool grayEnable;
 extern bool calibrating;
@@ -76,13 +76,14 @@ void keyThread(void*)
 			vTaskDelay(1);
 		}
 
-		Script<float, 10>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
+		Script<>::ScriptEntry* scriptEntry[2]{ &script[0][scriptIndex[0]], &script[1][scriptIndex[1]] };
 
 		for (auto& i : scriptEntry)
 		{
-			i->startTime = 0;
-			i->expireTime = portMAX_DELAY;
 			i->strength = +KeySpeed;
+			i->duration = portMAX_DELAY;
+			i->delay = 0;
+			i->stopCount = targetCount;
 		}
 
 		while (uart.isTransiting())
@@ -92,7 +93,7 @@ void keyThread(void*)
 		mixer[0].enable(MixNumber::GraySensor);
 		mixer[1].enable(MixNumber::GraySensor);
 
-		while (moveCount[0] + moveCount[1] < targetCount)
+		while (scriptEntry[0]->strength != 0 || scriptEntry[1]->strength != 0)
 			vTaskDelay(pdMS_TO_TICKS(100));
 	}
 }
