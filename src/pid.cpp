@@ -3,6 +3,7 @@
 void PID::setTarget(float target)
 {
 	this->target = target;
+	this->lastActual = target;
 }
 
 float PID::update(float actual, float deltaT)
@@ -22,7 +23,7 @@ float PID::update(float actual, float deltaT)
 
 	float p = kp * error;
 	float i = ki * integration;
-	float d = kd * delta;
+	float d = kd * filterD(delta);
 
 #if PID_DEBUG
 	portionP = p;

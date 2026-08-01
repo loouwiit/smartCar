@@ -1,5 +1,7 @@
 #pragma once
 
+#include "filter.hpp"
+
 // target
 //	v
 // PID	->	out
@@ -25,6 +27,8 @@ public:
 
 	float integrationRange[2] = { -1.0f / 0.0f, +1.0f / 0.0f };
 	float outputRange[2] = { -1.0f / 0.0f, +1.0f / 0.0f };
+
+	Filter<> filterD{};
 
 	void setTarget(float target);
 	float update(float actual, float deltaT = 1.0f);
