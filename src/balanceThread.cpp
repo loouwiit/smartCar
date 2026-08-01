@@ -92,6 +92,7 @@ void balanceThread(void*)
 
 static void balanceRecieve(char* recieve)
 {
+	if (recieve[0] == '\n' || recieve[0] == '\r' || recieve[0] == '\0') return;
 	if (recieve[0] == '!')
 	{
 		dealRecieve(recieve + 1);
