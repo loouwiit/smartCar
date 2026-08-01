@@ -1,7 +1,7 @@
 track on
-time 200
+time 0
 
-pid 5 0 4000
+pid 5 0 5000
 
 s +150 500 0
 
