@@ -166,9 +166,9 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_UartSystem_IOMUX_TX                                 (IOMUX_PINCM21)
 #define GPIO_UartSystem_IOMUX_RX_FUNC                  IOMUX_PINCM22_PF_UART0_RX
 #define GPIO_UartSystem_IOMUX_TX_FUNC                  IOMUX_PINCM21_PF_UART0_TX
-#define UartSystem_BAUD_RATE                                            (115200)
-#define UartSystem_IBRD_40_MHZ_115200_BAUD                                  (21)
-#define UartSystem_FBRD_40_MHZ_115200_BAUD                                  (45)
+#define UartSystem_BAUD_RATE                                              (9600)
+#define UartSystem_IBRD_40_MHZ_9600_BAUD                                   (260)
+#define UartSystem_FBRD_40_MHZ_9600_BAUD                                    (27)
 /* Defines for UartData */
 #define UartData_INST                                                      UART3
 #define UartData_INST_FREQUENCY                                         80000000
@@ -182,9 +182,9 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_UartData_IOMUX_TX                                   (IOMUX_PINCM36)
 #define GPIO_UartData_IOMUX_RX_FUNC                    IOMUX_PINCM35_PF_UART3_RX
 #define GPIO_UartData_IOMUX_TX_FUNC                    IOMUX_PINCM36_PF_UART3_TX
-#define UartData_BAUD_RATE                                               (19200)
-#define UartData_IBRD_80_MHZ_19200_BAUD                                    (260)
-#define UartData_FBRD_80_MHZ_19200_BAUD                                     (27)
+#define UartData_BAUD_RATE                                                (9600)
+#define UartData_IBRD_80_MHZ_9600_BAUD                                     (520)
+#define UartData_FBRD_80_MHZ_9600_BAUD                                      (53)
 
 
 

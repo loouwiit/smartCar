@@ -548,11 +548,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_UartSystem_init(void)
     DL_UART_Main_init(UartSystem_INST, (DL_UART_Main_Config *) &gUartSystemConfig);
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
-     *  Target baud rate: 115200
-     *  Actual baud rate: 115190.78
+     *  Target baud rate: 9600
+     *  Actual baud rate: 9599.81
      */
     DL_UART_Main_setOversampling(UartSystem_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(UartSystem_INST, UartSystem_IBRD_40_MHZ_115200_BAUD, UartSystem_FBRD_40_MHZ_115200_BAUD);
+    DL_UART_Main_setBaudRateDivisor(UartSystem_INST, UartSystem_IBRD_40_MHZ_9600_BAUD, UartSystem_FBRD_40_MHZ_9600_BAUD);
 
 
     /* Configure Interrupts */
@@ -597,11 +597,11 @@ SYSCONFIG_WEAK void SYSCFG_DL_UartData_init(void)
     DL_UART_Main_init(UartData_INST, (DL_UART_Main_Config *) &gUartDataConfig);
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
-     *  Target baud rate: 19200
-     *  Actual baud rate: 19199.62
+     *  Target baud rate: 9600
+     *  Actual baud rate: 9600.1
      */
     DL_UART_Main_setOversampling(UartData_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(UartData_INST, UartData_IBRD_80_MHZ_19200_BAUD, UartData_FBRD_80_MHZ_19200_BAUD);
+    DL_UART_Main_setBaudRateDivisor(UartData_INST, UartData_IBRD_80_MHZ_9600_BAUD, UartData_FBRD_80_MHZ_9600_BAUD);
 
 
     /* Configure Interrupts */
