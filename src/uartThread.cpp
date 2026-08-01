@@ -30,7 +30,6 @@ extern GraySensor graySensor;
 extern volatile bool grayEnable;
 
 extern TickType_t oledTimeStart;
-extern TickType_t oledTimeStop;
 
 extern float pitch, roll, yaw;
 
@@ -249,13 +248,12 @@ void dealRecieve(char* recieve)
 	}
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "time", 4))
 	{
-		TickType_t timeOffset = 0;
+		int timeOffset = 0;
 		if (rxSplitSize > 1)
 			timeOffset = atoi(rxBufferSplit[1]);
 
 		Lock lock{ *mutex };
-		oledTimeStart = xTaskGetTickCount() + timeOffset;
-		oledTimeStop = portMAX_DELAY;
+		oledTimeStart = xTaskGetTickCount() + pdMS_TO_TICKS(timeOffset);
 	}
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "gray", 4))
 	{

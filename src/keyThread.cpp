@@ -23,7 +23,6 @@ extern volatile bool grayEnable;
 extern volatile bool calibrating;
 
 extern volatile TickType_t oledTimeStart;
-extern volatile TickType_t oledTimeStop;
 
 extern volatile int moveCount[2];
 extern TaskHandle_t calibrateTaskHandle;
@@ -103,7 +102,6 @@ void keyThread(void*)
 			}
 
 			oledTimeStart = xTaskGetTickCount();
-			oledTimeStop = portMAX_DELAY;
 
 			mixer[0].enable(MixNumber::GraySensor);
 			mixer[1].enable(MixNumber::GraySensor);

@@ -86,6 +86,7 @@ void balanceThread(void*)
 				rxSize--;
 			} while (rxSize > 0);
 		}
+		vTaskDelay(1);
 	}
 }
 
