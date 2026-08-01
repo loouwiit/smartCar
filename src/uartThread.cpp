@@ -257,6 +257,26 @@ void dealRecieve(char* recieve)
 		oledTimeStart = xTaskGetTickCount() + timeOffset;
 		oledTimeStop = portMAX_DELAY;
 	}
+	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "gray", 4))
+	{
+		if (rxSplitSize > 1)
+		{
+			if (rxBufferSplit[1][0] == 'l')
+			{
+				for (auto i = 0; i < 8; i++)
+					graySensor.setLow(i);
+			}
+			else if (rxBufferSplit[1][0] == 'h')
+			{
+				for (auto i = 0; i < 8; i++)
+					graySensor.setHigh(i);
+			}
+		}
+		while (uart.isTransiting())
+			vTaskDelay(1);
+		txSize = sprintf(txBuffer, "threshold: %d %d %d %d %d %d %d %d\n", graySensor.getThreshold(0), graySensor.getThreshold(1), graySensor.getThreshold(2), graySensor.getThreshold(3), graySensor.getThreshold(4), graySensor.getThreshold(5), graySensor.getThreshold(6), graySensor.getThreshold(7));
+		uart.transit(txBuffer, txSize);
+	}
 	else if (rxBufferSplit[0][0] == '+')
 	{
 		int delta = 10;
