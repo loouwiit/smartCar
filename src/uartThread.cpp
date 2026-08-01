@@ -21,10 +21,10 @@ extern UART uart;
 extern volatile float captureSpeeds[2];
 extern volatile int moveCount[2];
 extern FPID fpid[2];
-extern FPID serveFpid[2];
 extern Motor motor[2];
 extern Mixer<float, MixNumber::Count> mixer[2];
 extern Script<> script[2];
+extern FPID serveFpid;
 extern Servo servo;
 extern GraySensor graySensor;
 extern volatile bool grayEnable;
@@ -227,6 +227,12 @@ void dealRecieve(char* recieve)
 			vTaskDelay(1);
 		}
 	}
+	else if (rxBufferSplit[0][0] == 'b' || stringCompare(rxBufferSplit[0], rxTokenLength[0], "balance", 7))
+	{
+		if (rxSplitSize <= 1) return;
+		float balancePoint = atof(rxBufferSplit[1]);
+		serveFpid.setTarget(250 - balancePoint);
+	}
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "track", 5))
 	{
 		if (rxSplitSize <= 1) return;
@@ -320,16 +326,13 @@ void dealRecieve(char* recieve)
 
 		Lock lock{ *mutex };
 
-		for (int i = 0; i < 2; i++)
-		{
-			serveFpid[i].kp = kp;
-			serveFpid[i].ki = ki;
-			serveFpid[i].kd = kd;
+		serveFpid.kp = kp;
+		serveFpid.ki = ki;
+		serveFpid.kd = kd;
 
-			serveFpid[i].integrationRange[0] = serveFpid[i].pidOutputRange[0] / serveFpid[i].ki;
-			serveFpid[i].integrationRange[1] = serveFpid[i].pidOutputRange[1] / serveFpid[i].ki;
-			serveFpid[i].clearIntegration();
-		}
+		serveFpid.integrationRange[0] = serveFpid.pidOutputRange[0] / serveFpid.ki;
+		serveFpid.integrationRange[1] = serveFpid.pidOutputRange[1] / serveFpid.ki;
+		serveFpid.clearIntegration();
 	}
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "target", 6))
 	{
