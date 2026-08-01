@@ -231,7 +231,9 @@ void dealRecieve(char* recieve)
 	{
 		if (rxSplitSize <= 1) return;
 		float balancePoint = atof(rxBufferSplit[1]);
-		serveFpid.setTarget(250 - balancePoint);
+		if (rxBufferSplit[1][0] == '+' || rxBufferSplit[1][0] == '-')
+			serveFpid.setTarget(serveFpid.getTarget() + balancePoint);
+		else serveFpid.setTarget(250 - balancePoint);
 	}
 	else if (stringCompare(rxBufferSplit[0], rxTokenLength[0], "track", 5))
 	{
