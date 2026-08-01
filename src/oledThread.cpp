@@ -40,6 +40,7 @@ void oledThread(void*)
 			stopDetectTime = nowTime + oledTimeStartCoolDown;
 			oledTimeStop = portMAX_DELAY;
 			lastStartTime = oledTimeStart;
+			OLED_Clear();
 		}
 
 		// 若正在记录，则更新时间
@@ -54,7 +55,7 @@ void oledThread(void*)
 				lastMoveCount = nowMoveCount;
 			} while (false);
 
-			sprintf(buffer, "time: %ld   ", ((oledTimeStop == portMAX_DELAY ? nowTime : oledTimeStop) - oledTimeStart) / 100);
+			sprintf(buffer, "time: %ld", ((oledTimeStop == portMAX_DELAY ? nowTime : oledTimeStop) - oledTimeStart) / 100);
 			OLED_ShowString(0, 0, buffer, 8);
 		}
 
