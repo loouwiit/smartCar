@@ -54,7 +54,7 @@ void oledThread(void*)
 				lastMoveCount = nowMoveCount;
 			} while (false);
 
-			sprintf(buffer, "time: %ld   ", ((oledTimeStop == portMAX_DELAY ? nowTime : oledTimeStop) - oledTimeStart) / 1000);
+			sprintf(buffer, "time: %ld   ", ((oledTimeStop == portMAX_DELAY ? nowTime : oledTimeStop) - oledTimeStart) / 100);
 			OLED_ShowString(0, 0, buffer, 8);
 		}
 

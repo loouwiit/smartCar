@@ -106,7 +106,7 @@ static void balanceRecieve(char* recieve)
 
 	float position = 250.0f - atof(recieve);
 
-	float portionP, portionI, portionD;
+	// float portionP, portionI, portionD;
 	auto nowTime = xTaskGetTickCount();
 
 	{
@@ -115,12 +115,13 @@ static void balanceRecieve(char* recieve)
 		if (abs(position - serveFpid.getTarget()) >= DeadZone)
 			servo[Servo::MixNumber::BalanceFeed] = serveFpid.getOut();
 		else servo[Servo::MixNumber::BalanceFeed] = 0;
-		portionP = serveFpid.portionP;
-		portionI = serveFpid.portionI;
-		portionD = serveFpid.portionD;
+		// portionP = serveFpid.portionP;
+		// portionI = serveFpid.portionI;
+		// portionD = serveFpid.portionD;
 		lastFpidTime = nowTime;
 	}
 
-	txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, portionP, portionI, portionD);
+	// txSize = sprintf(txBuffer, "%f, %f %f %f\n", position, portionP, portionI, portionD);
+	txSize = sprintf(txBuffer, "%.1f %.1f\n", position, serveFpid.getOut());
 	uart.transit(txBuffer, txSize);
 }

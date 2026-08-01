@@ -201,7 +201,6 @@ UART1.enabledDMATXTriggers             = "DL_UART_DMA_INTERRUPT_TX";
 UART1.rxTimeoutValue                   = 1;
 UART1.interruptPriority                = "1";
 UART1.$name                            = "UartSystem";
-UART1.targetBaudRate                   = 38400;
 UART1.peripheral.rxPin.$assign         = "boosterpack.33";
 UART1.peripheral.txPin.$assign         = "boosterpack.34";
 UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
